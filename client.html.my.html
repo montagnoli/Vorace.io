@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<style>
+		body {
+			background-color: black;
+		}
+
+	@font-face {
+    	font-family: Vorace;
+    	src: url(/img/sc.ttf);
+    	font-weight:400;
+	}
+
+		#login {
+			color: #000;
+			font-family: Vorace;
+			border: 1px solid #908a3d;
+			box-shadow: 0px 0px 200px #300;
+			background-color: #908a3d;
+			width: 55%;
+			height: 25%;
+			font-size: 50px;
+			text-align: center;
+			top: 5%;
+			left: 50%;
+			position: fixed;
+			transform: translate(-50%, 0);
+		}
+		span {font-size: 30px;}
+		#game {
+			image-rendering: optimizeSpeed;
+			image-rendering: -moz-crisp-edges;
+			image-rendering: -webkit-optimize-contrast;
+			image-rendering: optimize-contrast;
+			image-rendering: crisp-edges;
+			box-shadow: 0px 0px 200px #908a3d;
+			border: 1px solid black;
+			width: 50%;
+			height: 50%;
+			padding-left: 0;
+			padding-right: 0;
+			margin-left: auto;
+			margin-right: auto;
+			margin-top: auto;
+			margin-bottom: auto;
+			display: block;
+		}
+	</style>
+</head>
+
+<body>
+<!--	<div id="login" visibil>
+		<br/>
+		Vorace<br/>
+		<span>Pseudo :</span> <input type="input" value><br />
+		<button style="height: 30px; width: 100px; font-family: Vorace">P L A Y</button>
+	</div> !-->
+	<canvas id="game" width=896 height=928>
+		<script src="/socket.io/socket.io.js"></script>
+		Your browser does not support the HTML5 canvas tag.</canvas>
+
+	<script> //TODO fractionner le script en 2 : graphique et communication avec le serveur
+		function User(id, name, x, y, role) {
+			this.id = id;
+			this.name = name;
+			this.role = role;
+			this.x = x;
+			this.y = y;
+			this.dep = 0;
+			this.eats = false;
+			this.view = 3;
+		}
+
+
+		var images = [];
+
+		function get_img(path) {
+			for (var i = 0; i < images.length; i++) {
+				if (images[i][0] == path)
+					return images[i][1];
+			}
+			console.log('Error: ' + path);
+			return null;
+		}
+
+		function create_img(tab) {
+			for (var i = 0; i < tab.length; i++) {
+				var img = new Image();
+				var name = tab[i][0];
+				img.src = tab[i][1];
+				console.log('create :' + img.src);
+				img.onload = function() {
+					console.log('load : ' + this.src);
+				};
+				images.push([name, img]);
+			}
+		}
+
+		create_img([
+			["wait", "/img/Vorace/wait.png"],
+			["pbad", "/img/Vorace/bad.png"],
+			["pdead", "/img/Vorace/dead.png"],
+			["fbad", "/img/Phantom/bad.png"],
+			["dead", "/img/Phantom/dead.png"],
+			["nice", "/img/Phantom/nice.png"],
+			["wall", "/img/Tiles/wall.png"],
+			["darkness", "/img/Tiles/darkness.png"],
+			["ember", "/img/Items/ember.png"],
+			["fspawn", "/img/Tiles/fspawn1.png"],
+			["seringe", "/img/Items/seringe.png"],
+			["floor", "/img/Tiles/floor.png"]
+		]);
+
+		var c = document.getElementById("game");
+		var ctx = c.getContext("2d");
+		var my = null;
+		var ingame = false;
+		var enemy = [];
+		var pseudo = prompt('Pseudo ?') || "User" + Math.floor((Math.random() * 4200) + 1000);
+		var tab = [];
+		var timer = 0;
+
+
+		function get_user_by_id(id) {
+			if (my.id == id)
+				return my;
+			for (var i = 0; i < enemy.length; i++) {
+				ei = enemy[i];
+				if (ei.id == id)
+					return ei;
+			}
+			return (null);
+		}
+
+		function get_vorace() {
+			if (my.role == "V")
+				return my;
+			for (var i = 0; i < enemy.length; i++) {
+				ei = enemy[i];
+				if (ei.role == "V")
+					return ei;
+			}
+			return (null);
+		}
+
+		tab = [];
+		var socket = io.connect();
+		socket.emit('pseudo', pseudo);
+		socket.emit('play', true);
+		socket.on('list_player', function(list) {
+			clear_game();
+			ctx.shadowColor = "yellow";
+			ctx.shadowBlur = 10;
+			ctx.fillStyle = "black";
+			ctx.textAlign = "center";
+			ctx.font = "50px Vorace";
+			ctx.fillText("Waiting " + (list['required'] - list['players'].length) + " players...", 448, 224);
+			ctx.shadowBlur = 0;
+		});
+
+
+		socket.on('timer', function(t) {
+			timer = t;
+		});
+
+		socket.on('move', function(list) {
+			var v = get_vorace();
+			if (v == null)
+				return;
+			v.x = -1;
+			v.y = -1;
+			for (var i = 0; i < list.length; i++)
+			{
+				l = list[i];
+				e = get_user_by_id(l['id'])
+				e.x = l['x'];
+				e.y = l['y'];
+				e.eats = l['eat'];
+				if (e.role == "F")
+				{
+					e.view = l['view-length'];
+				}
+				if (my.role == "V")
+				{
+					if (e == my && (tab[e.y][e.x] == 1 || tab[e.y][e.x] == 3))
+						tab[e.y][e.x] = 9;
+				}
+				else
+				{
+					for (var j = 0; j < l['view'].length; j++)
+					{
+						var c = l['view'][j];
+						tab[c["y"]][c["x"]] = c['val'];
+						if (c['vorace'] == true)
+						{
+							v.x = c["x"];
+							v.y = c["y"];
+						}
+					}
+				}
+			}
+			refresh_game();
+		});
+
+		socket.on('start', function(list) {
+			for (i = 0; i < list['players'].length; i++) {
+				if (list['players'][i].id == socket.id)
+					my = new User(list['players'][i].id, list['players'][i].pseudo, list['players'][i].x, list['players'][i].y, list['players'][i].role);
+				else
+					enemy.push(new User(list['players'][i].id, list['players'][i].pseudo, list['players'][i].x, list['players'][i].y, list['players'][i].role));
+			}
+			tab = list['map']['map'];
+			launch_game();
+		});
+
+		socket.on('end_game', function(msg) {
+				my = null;
+				ingame = false;
+				enemy = [];
+				move = 0;
+				timer = 0;
+				ctx.shadowColor = "yellow";
+				ctx.shadowBlur = 10;
+				ctx.font = "50px Vorace";
+				ctx.fillStyle = "black";
+				ctx.fillText(msg, 448, 224);
+				ctx.font = "30px Vorace";
+				ctx.fillText("Press Enter for replay !", 448, 672);
+				ctx.shadowBlur = 10;
+			})
+			//TODO trouver des images
+		socket.on('life', function(life) {
+			ctx.clearRect(0, 896, c.width, c.height);
+			if (life == 0)
+			{
+				putimage(ctx, "pdead", 448 - 128, 448 - 128, 256, 256);
+				return;
+			}
+			ctx.font = "30px Vorace";
+			ctx.shadowColor = "yellow";
+			ctx.shadowBlur = 10;
+			ctx.fillStyle = "black";
+			ctx.fillText((life - 1), 448, 924);
+			ctx.shadowBlur = 0;
+			putimage(ctx, "wait", 460, 900, 32, 32);
+		})
+
+
+		function putimage(ctx, path, x, y, nx, ny) {
+			//	var image = new Image();
+			//	image.src = path;
+			var image = get_img(path);
+			if (path == "pbad") {
+				nx = 60;
+				x = x - 30;
+			}
+			ctx.drawImage(image, x, y, nx, ny);
+		}
+
+		function clear_game() {
+			ctx.fillStyle = "#000000";
+			ctx.clearRect(0, 0, c.width, c.height);
+		}
+
+		function refresh_game() {
+			// Create gradient
+			//TODO tout refaire le mode de rendu
+			//TODO Gerer la direction et afficher les personnages en consequence
+			//TODO Animation
+			//TODO bordure sur les murs
+			//IDEA Effet sonore
+			//TODO Chat + log de qui a gagne quoi
+			//IDEA differencier les fantomes
+			//TODO (v1) Meilleur affichage en cas de victoire
+			//IDEA tableau de score et systeme de round
+			for (y = 0; y < tab.length; y++) {
+				for (x = 0; x < tab[y].length; x++) {
+					var img = "";
+					var tile_size = 32;
+					var get = false;
+					if (my.role == 'F') {
+						for (i = 0; i < enemy.length; i++) {
+							e = enemy[i];
+							if (e.role == 'V') continue;
+							//if ((e.x >= x - e.view && e.x <= x + e.view) && (e.y >= y - e.view && e.y <= y + e.view)) {
+							if (Math.abs(e.x - x) + Math.abs(e.y - y) <= e.view) {
+								get = true;
+							}
+						}
+						//if ((my.x >= x - e.view && my.x <= x + e.view) && (my.y >= y - e.view && my.y <= y + e.view)) {
+						if (Math.abs(my.x - x) + Math.abs(my.y - y) <= my.view) {
+							get = true;
+						}
+					} else
+						get = true;
+					if (get == false) {
+						//TODO Degrade des zones sombres
+						//CHANGED effet rigolo quand le fantome bouge mais consome peut etre
+						putimage(ctx, "darkness", x * tile_size, y * tile_size, tile_size, tile_size);
+						continue;
+					}
+					if (tab[y][x] == 0)
+						putimage(ctx, "wall", x * tile_size, y * tile_size, tile_size, tile_size);
+					else if (tab[y][x] == 2)
+						putimage(ctx, "fspawn", x * tile_size, y * tile_size, tile_size, tile_size);
+					else
+						putimage(ctx, "floor", x * tile_size, y * tile_size, tile_size, tile_size);
+					if (tab[y][x] == 3)
+						img = "seringe";
+					else if (tab[y][x] == 1)
+						img = "ember";
+					else
+						img = "";
+					if (img != "")
+						putimage(ctx, img, x * tile_size, y * tile_size, tile_size, tile_size);
+					for (i = 0; i < enemy.length; i++) {
+						e = enemy[i];
+						if (e.x == x && e.y == y) {
+							if (e.role == "V") {
+								if (timer == 0)
+									img = "wait";
+								else
+									img = "pbad";
+							} else {
+								if (e.eats == true) {
+									img = "dead";
+								} else {
+									if (timer == 0)
+										img = "fbad";
+									else
+										img = "nice";
+								}
+							}
+							putimage(ctx, img, x * tile_size, y * tile_size, tile_size, tile_size);
+						}
+					}
+					if (my.x == x && my.y == y) {
+						if (my.role == "V") {
+							if (timer == 0)
+								img = "wait";
+							else
+								img = "pbad";
+						} else {
+							if (my.eats == true) {
+								img = "dead";
+							} else {
+								if (timer == 0)
+									img = "fbad";
+								else
+									img = "nice";
+							}
+						}
+						putimage(ctx, img, x * tile_size, y * tile_size, tile_size, tile_size);
+						ctx.strokeStyle = '#ff00ff';
+						ctx.strokeRect(x * tile_size, y * tile_size, tile_size, tile_size);
+					}
+				}
+			}
+		}
+
+		function launch_game() {
+			timer = 0;
+			ingame = true;
+			refresh_game();
+		}
+
+		document.addEventListener('keydown', function(event) {
+			if (!ingame)
+			{
+				if (event.keyCode == 13) //ENTER
+					socket.emit('play', true);
+				return ;
+			}
+			if (event.keyCode == 37 || event.keyCode == 65) //LEFT
+				my.dep = 1;
+			else if (event.keyCode == 38 || event.keyCode == 87) //UP
+				my.dep = 2;
+			else if (event.keyCode == 39 || event.keyCode == 68) //RIGHT
+				my.dep = 3;
+			else if (event.keyCode == 40 || event.keyCode == 83) //DOWN
+				my.dep = 4;
+			socket.emit('move', my.dep);
+		});
+	</script>
+
+</body>
+
+</html>

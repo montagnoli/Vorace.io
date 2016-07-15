@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<style>
+		body {
+			background-color: black;
+		}
+		#contener {
+			width: 100%; height: 100%;
+			display: flex;
+			flex-direction: row;
+			justify-content: center;
+			    align-items: center;
+
+		}
+		#game {
+			position: relative;
+			/*https://css-tricks.com/snippets/css/a-guide-to-flexbox/*/
+			flex: 0 1 auto;
+			border: 1px solid black;
+			width: 50%;
+			box-shadow: 0px 0px 200px #ffed00;
+
+		}
+		#game canvas {
+			image-rendering: optimizeSpeed;
+			image-rendering: -moz-crisp-edges;
+			image-rendering: -webkit-optimize-contrast;
+			image-rendering: optimize-contrast;
+			image-rendering: crisp-edges;
+			position: absolute;
+			left:0;
+			top:0;
+			display: block;
+		}
+	</style>
+			<script type="text/javascript" src="js/classes/Character.js"></script>
+			<script type="text/javascript" src="js/classes/Player.js"></script>
+			<script type="text/javascript" src="js/classes/Layer.js"></script>
+			<script type="text/javascript" src="js/classes/Map.js"></script>
+			<script type="text/javascript" src="js/classes/Generic.js"></script>
+			<script type="text/javascript" src="js/classes/Menu.js"></script>
+			<script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+	<div id="contener">
+	<div id="game"></div>
+	</div>
+	<script type="text/javascript">
+			var tile_size = 32;
+
+			layer_ui = new Layer("game", 'ui', 896, 928, 6);
+			layer_players = new Layer("game", 'players', 896, 896, 4);
+			layer_map = new Layer("game", 'map', 896, 896, 1);
+			layer_items = new Layer("game", 'items', 896, 896, 3);
+			layer_fx = new Layer("game", 'fx', 896, 896,5);
+			var vorace = layer_players.AddObjet(new Sprite("Vorace", 0, 0, "Players"));
+			console.log(vorace);
+			vorace.current_anim = "bad_left";
+			//TODO auto initialiser sur l'annimation wait !!! differente de down
+			vorace.Anim_start();
+			//TODO fractionner le script en 2 : graphique et communication avec le serveur
+		function User(id, name, x, y, role) {
+			this.id = id;
+			this.name = name;
+			this.role = role;
+			this.x = x;
+			this.y = y;
+			this.dep = 0;
+			this.eats = false;
+			this.view = 3;
+		}
+
+		function get_vorace() {
+			if (my.role == "V")
+				return my;
+			for (var i = 0; i < enemy.length; i++) {
+				ei = enemy[i];
+				if (ei.role == "V")
+					return ei;
+			}
+			return (null);
+		}
+
+		var images = {};
+		function create_img(tab) {
+			for (var i = 0; i < tab.length; i++) {
+				var img = new Image();
+				var name = tab[i][0];
+				img.src = tab[i][1];
+				console.log('create :' + img.src);
+				img.onload = function() {
+					console.log('load : ' + this.src);
+				};
+				images[name] = img;
+			}
+		}
+		//TODO Autoload tout ca, possible sans ajax ??????
+		create_img([
+			["wait", "/img/Vorace/wait.png"],
+			["pbad", "/img/Vorace/bad.png"],
+			["pdead", "/img/Vorace/dead.png"],
+			["fbad", "/img/Phantom/bad.png"],
+			["dead", "/img/Phantom/dead.png"],
+			["nice", "/img/Phantom/nice.png"],
+			["wall", "/img/Tiles/wall.png"],
+			["darkness", "/img/Tiles/darkness.png"],
+			["ember", "/img/Items/ember.png"],
+			["fspawn", "/img/Tiles/fspawn1.png"],
+			["seringe", "/img/Items/seringe.png"],
+			["floor", "/img/Tiles/floor.png"],
+			["light", "/img/Fx/light.png"],
+			["light2", "/img/Fx/light2.png"],
+			["Vorace_bad_left_0", "/img/Vorace/bad_left_0.png"],
+			["Vorace_bad_left_1", "/img/Vorace/bad_left_1.png"],
+			["Vorace_bad_left_2", "/img/Vorace/bad_left_2.png"]
+		]);
+
+		// var c = document.getElementById("game");
+		//c.getContext("2d");
+		var my = null;
+		var ingame = false;
+		var enemy = [];
+		var pseudo = prompt('Pseudo ?') || "User" + Math.floor((Math.random() * 4200) + 1000);
+		var tab = [];
+		var timer = 0;
+
+
+		function get_user_by_id(id) {
+			if (my.id == id)
+				return my;
+			for (var i = 0; i < enemy.length; i++) {
+				ei = enemy[i];
+				if (ei.id == id)
+					return ei;
+			}
+			return (null);
+		}
+
+		tab = [];
+		var socket = io.connect();
+		socket.emit('pseudo', pseudo);
+		socket.emit('play', true);
+		socket.on('list_player', function(list) {
+		clear_game();
+		layer_ui.ctx.shadowColor = "yellow";
+		layer_ui.ctx.shadowBlur = 10;
+		layer_ui.ctx.fillStyle = "black";
+		layer_ui.ctx.textAlign = "center";
+		layer_ui.ctx.font = "50px Arial";
+		layer_ui.ctx.fillText("Waiting " + (list['required'] - list['players'].length) + " players...", 448, 224);
+		layer_ui.ctx.shadowBlur = 0;
+		});
+
+
+		socket.on('timer', function(t) {
+			timer = t;
+		});
+
+		socket.on('move', function(list) {
+					var v = get_vorace();
+					if (v == null)
+						return;
+					v.x = -1;
+					v.y = -1;
+					for (var i = 0; i < list.length; i++)
+					{
+						l = list[i];
+						e = get_user_by_id(l['id'])
+						e.x = l['x'];
+						e.y = l['y'];
+						e.eats = l['eat'];
+						if (e.role == "F")
+						{
+							e.view = l['view-length'];
+						}
+						if (my.role == "V")
+						{
+							if (e == my && (tab[e.y][e.x] == 1 || tab[e.y][e.x] == 3))
+								tab[e.y][e.x] = 9;
+						}
+						else
+						{
+							for (var j = 0; j < l['view'].length; j++)
+							{
+								var c = l['view'][j];
+								tab[c["y"]][c["x"]] = c['val'];
+								if (c['vorace'] == true)
+								{
+									v.x = c["x"];
+									v.y = c["y"];
+								}
+							}
+						}
+					}
+					refresh_game();
+				});
+
+		socket.on('start', function(list) {
+			for (i = 0; i < list['players'].length; i++) {
+				if (list['players'][i].id == socket.id)
+					my = new User(list['players'][i].id, list['players'][i].pseudo, list['players'][i].x, list['players'][i].y, list['players'][i].role);
+				else
+					enemy.push(new User(list['players'][i].id, list['players'][i].pseudo, list['players'][i].x, list['players'][i].y, list['players'][i].role));
+			}
+			map = new Map ();
+			tab = list['map']['map'];
+			map.field = list['map']['map'];
+
+			launch_game();
+		});
+
+		socket.on('end_game', function(msg) {
+				my = null;
+				ingame = false;
+				enemy = [];
+				move = 0;
+				timer = 0;
+				//UI
+				layer_ui.ctx.shadowColor = "yellow";
+				layer_ui.ctx.shadowBlur = 10;
+				layer_ui.ctx.font = "50px Arial";
+				layer_ui.ctx.fillStyle = "black";
+				layer_ui.ctx.fillText(msg, 448, 224);
+				layer_ui.ctx.font = "30px Arial";
+				layer_ui.ctx.fillText("Press Enter for replay !", 448, 672);
+				layer_ui.ctx.shadowBlur = 10;
+			})
+			//TODO trouver des images
+		socket.on('life', function(life) {
+			layer_ui.ctx.clearRect(0, 896, layer_ui.w, layer_ui.h);
+			if (life == 0)
+			{
+				putimage(layer_ui.ctx, "pdead", 448 - 128, 448 - 128, 256, 256);
+				return;
+			}
+			//UI
+			layer_ui.ctx.font = "30px Arial";
+			layer_ui.ctx.shadowColor = "yellow";
+			layer_ui.ctx.shadowBlur = 10;
+			layer_ui.ctx.fillStyle = "black";
+			layer_ui.ctx.fillText((life - 1), 448, 924);
+			layer_ui.ctx.shadowBlur = 0;
+			putimage(layer_ui.ctx, "wait", 460, 900, 32, 32);
+		})
+
+		function light(x, y, nx, ny)
+		{
+				var rand = Math.floor(Math.random() * 10)
+				console.log(x + " " + y + " " + nx+ " " +ny );
+					layer_fx.ctx.save();
+					layer_fx.ctx.fillStyle = "black"
+					layer_fx.ctx.strokeRect(0, 0, layer_fx.canvas.width, layer_fx.canvas.height);
+					layer_fx.ctx.globalCompositeOperation ="destination-out";
+					putimage(layer_fx.ctx, "light2", x -nx /2, y - ny /2,  nx  - rand, ny - rand)
+;
+					layer_fx.ctx.restore();
+		}
+		// function putimage(ctx, path, x, y, nx, ny) {
+		// 	//	var image = new Image();
+		// 	//	image.src = path;
+		// 	var image = get_img(path);
+		// 	if (path == "pbad") {
+		// 		nx = 60;
+		// 		x = x - 30;
+		// 	}
+		// 	ctx.drawImage(image, x, y, nx, ny);
+		// }
+
+		function clear_game() {
+			layer_players.ctx.clearRect(0, 0, layer_players.canvas.width, layer_players.canvas.height);
+			layer_ui.ctx.clearRect(0, 0, layer_ui.canvas.width, layer_ui.canvas.height);
+			layer_players.ctx.clearRect(0, 0, layer_players.canvas.width, layer_players.canvas.height);
+		}
+		function refresh_game() {
+			// Create gradient
+			//TODO 80ct val
+			//TODO tout refaire le mode de rendu
+			//TODO Gerer la direction et afficher les personnages en consequence
+			//TODO Animation
+			//TODO bordure sur les murs
+			//IDEA Effet sonore
+			//TODO Chat + log de qui a gagne quoi
+			//IDEA differencier les fantomes
+			//TODO (v1) Meilleur affichage en cas de victoire
+			//IDEA tableau de score et systeme de round
+			var tab = map.field;
+			//vorace.Move(my.x, my.y, 125)
+			vorace.posy = my.y;
+			vorace.posx = my.x;
+	//		layer_players.ctx.clearRect(0, 0, layer_players.canvas.width, layer_players.canvas.height);
+			layer_items.Clear();
+			layer_ui.Clear();
+			layer_fx.Clear();
+	//		layer_players.Clear();
+			if (my.role == 'F')
+			{
+					layer_fx.ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
+					layer_fx.ctx.fillRect(0, 0, layer_fx.canvas.width, layer_fx.canvas.height);
+					light(my.x * tile_size + tile_size / 2, my.y * tile_size + tile_size / 2, 150 + my.view * tile_size, 150 + my.view * tile_size);
+					for (i = 0; i < enemy.length; i++) {
+						e = enemy[i];
+						if (e.role == 'V')
+						 continue;
+						light(e.x * tile_size + tile_size / 2, e.y * tile_size + tile_size / 2,  150 + my.view * tile_size, 150+ my.view * tile_size);
+					}
+			}
+			for (y = 0; y < tab.length; y++) {
+				for (x = 0; x < tab[y].length; x++) {
+					var img = "";
+
+					var get = false;
+					if (my.role == 'F') {
+
+						for (i = 0; i < enemy.length; i++) {
+							e = enemy[i];
+							if (e.role == 'V') continue;
+							if (Math.abs(e.x - x) + Math.abs(e.y - y) <= e.view) {
+								get = true;
+							}
+						}
+						if (Math.abs(my.x - x) + Math.abs(my.y - y) <= my.view) {
+							get = true;
+						}
+					} else
+						get = true;
+					if (get == false) {
+
+						//CHANGED effet rigolo quand le fantome bouge mais consome peut etre
+						//putimage(layer_fx.ctx, "darkness", x * tile_size, y * tile_size, tile_size, tile_size);
+						continue;
+					}
+					if (tab[y][x] == 3)
+						img = "seringe";
+					else if (tab[y][x] == 1)
+						img = "ember";
+					else
+						img = "";
+					if (img != "")
+					{
+						var rand = Math.floor(Math.random() * 5)
+						putimage(layer_items.ctx, img, x * tile_size, y * tile_size, tile_size - rand, tile_size - rand);
+					}
+					for (i = 0; i < enemy.length; i++) {
+						e = enemy[i];
+						if (e.x == x && e.y == y) {
+
+							// if (e.role == "V") {
+							// 	if (timer == 0)
+							// 		img = "wait";
+							// 	else
+							// 		img = "pbad";
+							// } else {
+								if (e.eats == true) {
+									img = "dead";
+								} else {
+									if (timer == 0)
+										img = "fbad";
+									else
+										img = "nice";
+								}
+							//}
+							putimage(layer_players.ctx, img, x * tile_size, y * tile_size, tile_size, tile_size);
+						}
+					}
+					if (my.x == x && my.y == y) {
+						if (my.role == "V") {
+							if (timer == 0)
+								img = "wait";
+							else
+							{
+
+								img = "pbad";
+							}
+						} else {
+							if (my.eats == true) {
+								img = "dead";
+							} else {
+								if (timer == 0)
+									img = "fbad";
+								else
+									img = "nice";
+							}
+						}
+						// layer_fx.ctx.save();
+						// layer_fx.ctx.shadowColor = 'yellow';
+						// layer_fx.ctx.shadowBlur = 30;
+						// layer_fx.ctx.globalCompositeOperation ="destination-in";
+						// putimage(layer_fx.ctx, img, x * tile_size, y * tile_size, tile_size, tile_size);
+						// layer_fx.ctx.restore();
+					}
+					//TODO il y a un glitch quand on se deplace parceque les interval de rafraichissement des animation et cette fonction qui se declenhe sous l'appel du seveur = fonction a detruire a 90%
+				}
+			}
+		}
+		var refresh_rate = 100;
+		function launch_game() {
+			timer = 0;
+			ingame = true;
+			map.Draw(layer_map.ctx);
+			refresh_game();
+			setInterval(function () {
+				layer_players.Clear();
+				layer_players.Draw();
+			}, refresh_rate);
+		}
+		document.addEventListener('keydown', function(event) {
+			if (!ingame)
+			{
+				if (event.keyCode == 13) //ENTER
+					socket.emit('play', true);
+				return ;
+			}
+			//TODO fonction qui va set animation corretement (sprite.anicurent_anim = "animation")!!! attention si le mec tourne contre le mur.
+			if (event.keyCode == 37 || event.keyCode == 65) //LEFT
+				my.dep = 1;
+			else if (event.keyCode == 38 || event.keyCode == 87) //UP
+				my.dep = 2;
+			else if (event.keyCode == 39 || event.keyCode == 68) //RIGHT
+				my.dep = 3;
+			else if (event.keyCode == 40 || event.keyCode == 83) //DOWN
+				my.dep = 4;
+			socket.emit('move', my.dep);
+		});
+	</script>
+</body>
+</html>

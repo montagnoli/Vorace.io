@@ -56,13 +56,13 @@
 			layer_map = new Layer("game", 'map', 896, 896, 1);
 			layer_items = new Layer("game", 'items', 896, 896, 3);
 			layer_fx = new Layer("game", 'fx', 896, 896,5);
-			var vorace = layer_players.AddObjet(new Sprite("Vorace", 0, 0, "Players"));
+			var vorace = layer_players.AddObjet(new Sprite("vorace", 0, 0, "players"));
 			console.log(vorace);
-			vorace.current_anim = "bad_left";
+		//	vorace.current_anim = "nice_down";
 			//TODO auto initialiser sur l'annimation wait !!! differente de down
-			vorace.Anim_start();
+
 			//TODO fractionner le script en 2 : graphique et communication avec le serveur
-		function User(id, name, x, y, role) {
+		function User(id, name, x, y, role, sprite) {
 			this.id = id;
 			this.name = name;
 			this.role = role;
@@ -71,6 +71,7 @@
 			this.dep = 0;
 			this.eats = false;
 			this.view = 3;
+			this.sprite = sprite;
 		}
 
 		function get_vorace() {
@@ -113,9 +114,21 @@
 			["floor", "/img/Tiles/floor.png"],
 			["light", "/img/Fx/light.png"],
 			["light2", "/img/Fx/light2.png"],
-			["Vorace_bad_left_0", "/img/Vorace/bad_left_0.png"],
-			["Vorace_bad_left_1", "/img/Vorace/bad_left_1.png"],
-			["Vorace_bad_left_2", "/img/Vorace/bad_left_2.png"]
+			["fantom_dead", "/img/fantom/fantom_dead.png"],
+			["fantom_nice_left", "/img/fantom/nice_left.png"],
+			["fantom_nice_right", "/img/fantom/nice_right.png"],
+			["fantom_bad_down", "/img/fantom/bad_down.png"],
+			["fantom_nice_down", "/img/fantom/nice_down.png"],
+			["fantom_nice_up", "/img/fantom/nice_up.png"],
+			["fantom_bad_up", "/img/fantom/bad_up.png"],
+			["vorace_nice_left", "/img/vorace/nice_left.png"],
+			["vorace_bad_right", "/img/vorace/bad_right.png"],
+			["vorace_nice_right", "/img/vorace/nice_right.png"],
+			["vorace_bad_down", "/img/vorace/bad_down.png"],
+			["vorace_nice_down", "/img/vorace/nice_down.png"],
+			["vorace_nice_up", "/img/vorace/nice_up.png"],
+			["vorace_bad_up", "/img/vorace/bad_up.png"],
+			["vorace_bad_left", "/img/vorace/bad_left.png"],
 		]);
 
 		// var c = document.getElementById("game");
@@ -201,9 +214,30 @@
 		socket.on('start', function(list) {
 			for (i = 0; i < list['players'].length; i++) {
 				if (list['players'][i].id == socket.id)
+				{
 					my = new User(list['players'][i].id, list['players'][i].pseudo, list['players'][i].x, list['players'][i].y, list['players'][i].role);
+						if (my.role == "V")
+						{
+								my.sprite = new Sprite("vorace");
+								my.sprite.current_anim = "nice_down";
+						}
+						else
+								my.sprite = new Sprite("fantom")
+
+					layer_players.AddObjet(my.sprite);
+				}
 				else
+				{
 					enemy.push(new User(list['players'][i].id, list['players'][i].pseudo, list['players'][i].x, list['players'][i].y, list['players'][i].role));
+					if (enemy[0].role == "V")
+					{
+						enemy[0].sprite = new Sprite("vorace")
+						enemy[0].sprite.current_anim = "nice_down";
+					}
+					else
+						enemy[0].sprite = new Sprite("fantom")
+					layer_players.AddObjet(enemy[0].sprite);
+				}
 			}
 			map = new Map ();
 			tab = list['map']['map'];
@@ -249,7 +283,6 @@
 		function light(x, y, nx, ny)
 		{
 				var rand = Math.floor(Math.random() * 10)
-				console.log(x + " " + y + " " + nx+ " " +ny );
 					layer_fx.ctx.save();
 					layer_fx.ctx.fillStyle = "black"
 					layer_fx.ctx.strokeRect(0, 0, layer_fx.canvas.width, layer_fx.canvas.height);
@@ -288,12 +321,17 @@
 			//IDEA tableau de score et systeme de round
 			var tab = map.field;
 			//vorace.Move(my.x, my.y, 125)
-			vorace.posy = my.y;
-			vorace.posx = my.x;
+			my.sprite.posy = my.y;
+			my.sprite.posx = my.x;
 	//		layer_players.ctx.clearRect(0, 0, layer_players.canvas.width, layer_players.canvas.height);
 			layer_items.Clear();
 			layer_ui.Clear();
 			layer_fx.Clear();
+				for (i = 0; i < enemy.length; i++) {
+					e = enemy[i];
+					e.sprite.posx = e.x;
+					e.sprite.posy = e.y;
+				}
 	//		layer_players.Clear();
 			if (my.role == 'F')
 			{
@@ -343,54 +381,13 @@
 						var rand = Math.floor(Math.random() * 5)
 						putimage(layer_items.ctx, img, x * tile_size, y * tile_size, tile_size - rand, tile_size - rand);
 					}
-					for (i = 0; i < enemy.length; i++) {
-						e = enemy[i];
-						if (e.x == x && e.y == y) {
-
-							// if (e.role == "V") {
-							// 	if (timer == 0)
-							// 		img = "wait";
-							// 	else
-							// 		img = "pbad";
-							// } else {
-								if (e.eats == true) {
-									img = "dead";
-								} else {
-									if (timer == 0)
-										img = "fbad";
-									else
-										img = "nice";
-								}
-							//}
-							putimage(layer_players.ctx, img, x * tile_size, y * tile_size, tile_size, tile_size);
-						}
-					}
-					if (my.x == x && my.y == y) {
-						if (my.role == "V") {
-							if (timer == 0)
-								img = "wait";
-							else
-							{
-
-								img = "pbad";
-							}
-						} else {
-							if (my.eats == true) {
-								img = "dead";
-							} else {
-								if (timer == 0)
-									img = "fbad";
-								else
-									img = "nice";
-							}
-						}
 						// layer_fx.ctx.save();
 						// layer_fx.ctx.shadowColor = 'yellow';
 						// layer_fx.ctx.shadowBlur = 30;
 						// layer_fx.ctx.globalCompositeOperation ="destination-in";
 						// putimage(layer_fx.ctx, img, x * tile_size, y * tile_size, tile_size, tile_size);
 						// layer_fx.ctx.restore();
-					}
+				//	}
 					//TODO il y a un glitch quand on se deplace parceque les interval de rafraichissement des animation et cette fonction qui se declenhe sous l'appel du seveur = fonction a detruire a 90%
 				}
 			}
@@ -400,11 +397,43 @@
 			timer = 0;
 			ingame = true;
 			map.Draw(layer_map.ctx);
+
+				for (i = 0; i < enemy.length; i++) {
+					e = enemy[i];
+				e.sprite.Anim_start();
+			}
+
+			my.sprite.Anim_start();
 			refresh_game();
 			setInterval(function () {
 				layer_players.Clear();
 				layer_players.Draw();
 			}, refresh_rate);
+		}
+
+		function set_anim(dep, sprite)
+		{
+			console.log("set_anim")
+			if (timer == 0) {
+			if (dep == 1)
+				sprite.current_anim = "nice_left";
+			else 	if (dep == 2)
+				sprite.current_anim = "nice_up";
+			else 	if (dep == 3)
+				sprite.current_anim = "nice_right";
+			else 	if (dep == 4)
+				sprite.current_anim = "nice_down";
+			}
+			else {
+			if (dep == 1)
+				sprite.current_anim = "bad_left";
+			else 	if (dep == 2)
+				sprite.current_anim = "bad_up";
+			else 	if (dep == 3)
+				sprite.current_anim = "bad_right";
+			else 	if (dep == 4)
+				sprite.current_anim = "bad_down";
+			}
 		}
 		document.addEventListener('keydown', function(event) {
 			if (!ingame)
@@ -422,6 +451,7 @@
 				my.dep = 3;
 			else if (event.keyCode == 40 || event.keyCode == 83) //DOWN
 				my.dep = 4;
+			set_anim(my.dep, my.sprite);
 			socket.emit('move', my.dep);
 		});
 	</script>

@@ -72,11 +72,9 @@ function Game() {
         var it = this.maps['map'][u.y][u.x];
         if (u.x == p.x && u.y == p.y && this.timer != 0) {
             u.eats = true;
-            this.send_move();
         }
         if (it == 2 && u.eats == true) {
             u.eats = false;
-            this.send_move();
         }
         if (it == 42) {
             u.view += 2;
@@ -230,13 +228,12 @@ function Game() {
             if (u == p) continue;
             this.check_case_fantome(u);
             u.move(this.maps['map']);
-            this.send_move();
             this.check_case_fantome(u);
         }
         if (this.check_pacman() == true)
             return;
-        p.move(this.maps['map']);
         this.send_move();
+        p.move(this.maps['map']);
         if (this.check_pacman() == true)
             return;
         this.check_case_pacman();

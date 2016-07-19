@@ -315,7 +315,7 @@
 			//my.sprite.Move(my.x, my.y, 125)
 			my.sprite.posy = my.y;
 			my.sprite.posx = my.x;
-			set_anim_dep(my.dep.toString(), my.sprite);
+			set_anim_dep(my.dep.toString(), my.sprite, my);
 			//		layer_players.ctx.clearRect(0, 0, layer_players.canvas.width, layer_players.canvas.height);
 			layer_items.Clear();
 			layer_ui.Clear();
@@ -324,18 +324,18 @@
 				e = enemy[i];
 				e.sprite.posx = e.x;
 				e.sprite.posy = e.y;
-				set_anim_dep(e.dep.toString(), e.sprite);
+				set_anim_dep(e.dep.toString(), e.sprite, e);
 			}
 			//		lumiere pour les fantomes;
 			if (my.role == 'F') {
 				layer_fx.ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
 				layer_fx.ctx.fillRect(0, 0, layer_fx.canvas.width, layer_fx.canvas.height);
-				light(my.x * tile_size + tile_size / 2, my.y * tile_size + tile_size / 2, 150 + my.view * tile_size, 150 + my.view * tile_size);
+				light(my.x * tile_size + tile_size / 2, my.y * tile_size + tile_size / 2, my.view * (tile_size + 50), my.view * (tile_size + 50));
 				for (i = 0; i < enemy.length; i++) {
 					e = enemy[i];
 					if (e.role == 'V')
 						continue;
-					light(e.x * tile_size + tile_size / 2, e.y * tile_size + tile_size / 2, 150 + my.view * tile_size, 150 + my.view * tile_size);
+					light(e.x * tile_size + tile_size / 2, e.y * tile_size + tile_size / 2, my.view * (tile_size + 50), my.view * (tile_size + 50));
 				}
 			}
 			for (y = 0; y < tab.length; y++) {
@@ -404,7 +404,7 @@
 			}, 25);
 		}
 
-		function set_anim_dep(dep, sprite) {
+		function set_anim_dep(dep, sprite, user) {
 
 			var dep_tab = {
 				0: "down",
@@ -420,7 +420,9 @@
 				else
 					sprite.current_anim = "bad_" + dep_tab[dep];
 			else if (sprite.name = "fantom")
-				if (timer == 0)
+				if (user.eats)
+					sprite.current_anim = "dead";
+				else if (timer == 0)
 					sprite.current_anim = "bad_" + dep_tab[dep];
 				else
 					sprite.current_anim = "nice_" + dep_tab[dep];

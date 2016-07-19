@@ -17,17 +17,15 @@ function Map(ctx) {
             for (x = 0, lx = (this.field[y]).length; x < lx; x++) {
                 key = this.field[y][x];
                 putimage(context, textures[key], 32 * x, 32 * y, 32, 32);
-                if (y > 1) {
-                    if (this.field[y - 1][x] != "0")
-                        putimage(context, "wall_limit", 32 * x, 32 * y, 32, 32, 90);
-                    if (this.field[y + 1][x] != "0")
+                if (this.field[y][x] == "0") {
+                    if (y < this.field.length - 1 && this.field[y + 1][x] != "0")
                         putimage(context, "wall_limit", 32 * x, 32 * y, 32, 32, -90);
-                }
-                if (x > 1) {
-                    if (this.field[y][x + 1] != "0")
-                        putimage(context, "wall_limit", 32 * x, 32 * y, 32, 32, 180);
-                    if (this.field[y][x - 1] != "0")
+                    if (y > 1 && this.field[y - 1][x] != "0")
+                        putimage(context, "wall_limit", 32 * x, 32 * y, 32, 32, 90);
+                    if (x > 1 && this.field[y][x - 1] != "0")
                         putimage(context, "wall_limit", 32 * x, 32 * y, 32, 32);
+                    if (x < this.field[y].length - 1 && this.field[y][x + 1] != "0")
+                        putimage(context, "wall_limit", 32 * x, 32 * y, 32, 32, 180);
                 }
             }
     }

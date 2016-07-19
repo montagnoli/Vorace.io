@@ -5,10 +5,16 @@ function putimage(ctx, path, x, y, nx, ny, angle)
 	if (path[0] != '/') //detect si le path indique une image load avec create_img
 	 {
 		image = images[path];
-	 	if (path == "pbad") {
-			nx = 60;
-			x = x - 30;
+		if (angle)
+		{
+			ctx.save();
+			ctx.translate(x, y);
+			ctx.translate(nx/2, ny/2);
+			ctx.rotate(angle * (0.01745329251));
+			ctx.drawImage(image, -(nx/2), -(ny/2), nx, ny);
+			ctx.restore();
 		}
+		else
 		 ctx.drawImage(image, x, y, nx, ny);
 	}
 	else {

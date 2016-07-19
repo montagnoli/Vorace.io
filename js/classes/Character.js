@@ -26,8 +26,9 @@ function Sprite(name, x , y, categorie)
 		that.anim_isplay == true;
 		that.interval_id = setInterval(function () {
 
-			var width = images[that.name + "_" + that.current_anim].naturalWidth
-			var nb_frame = width / 64;
+			var width = images[that.name + "_" + that.current_anim].naturalWidth;
+			var height = images[that.name + "_" + that.current_anim].naturalHeight;
+			var nb_frame = width / height;
 			if (that.anim_index >= nb_frame - 1)
 				that.anim_index = -1;
 	//		that.anim_frame = images[that.name + "_" + that.current_anim];
@@ -44,14 +45,16 @@ function Sprite(name, x , y, categorie)
 	this.Draw = function(params)	{
 		if (this.anim_isplay = true)
 		{
+			var height = images[that.name + "_" + that.current_anim].naturalHeight;
+			var centering = height * (2/8)
 			//console.log(this.current_anim)
 			//putimage(this.ctx, this.name + "_" + this.current_anim, this.posx * tile_size, this.posy * tile_size, tile_size, tile_size);
 			this.ctx.drawImage(
 				images[this.name + "_" + this.current_anim],
-				this.anim_index * 64, 0,
-				64, 64,
-				this.posx * tile_size - 48 + this.movex , this.posy * tile_size - 48  + this.movey,
-				128, 128);
+				this.anim_index * height, 0,
+				height, height,
+				this.posx * tile_size - centering + this.movex , this.posy * tile_size - centering  + this.movey,
+				height, height);
 		}
 		else
 			putimage(this.ctx, this.anime_frame, this.posx * tile_size, this.posy * tile_size, tile_size, tile_size);
@@ -60,7 +63,7 @@ function Sprite(name, x , y, categorie)
 	this.movey = 0;
 	this.prevx = 0;
 	this.prevy = 0;
-	
+
 	this.Move = function(x, y, time)
 	{
 		this.prevx = this.posx;

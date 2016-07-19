@@ -26,6 +26,7 @@
 		}
 
 		#game canvas {
+			width: 100%;
 			image-rendering: optimizeSpeed;
 			image-rendering: -moz-crisp-edges;
 			image-rendering: -webkit-optimize-contrast;
@@ -103,12 +104,6 @@
 		}
 		//TODO Autoload tout ca, possible sans ajax ??????
 		create_img([
-			["wait", "/img/Vorace/wait.png"],
-			["pbad", "/img/Vorace/bad.png"],
-			["pdead", "/img/Vorace/dead.png"],
-			["fbad", "/img/Phantom/bad.png"],
-			["dead", "/img/Phantom/dead.png"],
-			["nice", "/img/Phantom/nice.png"],
 			["wall", "/img/Tiles/wall.png"],
 			["wall_limit", "/img/Tiles/wall_limit.png"],
 			["darkness", "/img/Tiles/darkness.png"],
@@ -135,6 +130,7 @@
 			["vorace_nice_up", "/img/vorace/nice_up.png"],
 			["vorace_bad_up", "/img/vorace/bad_up.png"],
 			["vorace_bad_left", "/img/vorace/bad_left.png"],
+			["golden_shine", "/img/golden/shine.png"]
 		]);
 
 		// var c = document.getElementById("game");
@@ -298,6 +294,28 @@
 			layer_ui.ctx.clearRect(0, 0, layer_ui.canvas.width, layer_ui.canvas.height);
 			layer_players.ctx.clearRect(0, 0, layer_players.canvas.width, layer_players.canvas.height);
 		}
+		var golden;
+		socket.on('golden', function (s) {
+			if (s !== false)
+				{
+					console.log("create golden");
+					console.log(s);
+					golden = layer_items.AddObjet(new Sprite("golden"));
+					golden.posy = s['y'];
+					golden.posx = s['x'];
+					golden.current_anim = "shine";
+					console.log(golden);
+					golden.Anim_start();
+				}
+			else {
+				console.log("delete golden");
+				var i = layer_items.objects.indexOf(golden);
+				golden.Anim_stop();
+				golden.posx = -1;
+				golden.posy = -1;
+				layer_items.objects.splice(i, 1);
+			}
+		});
 
 		function refresh_game() {
 			// Create gradient
@@ -316,9 +334,9 @@
 			my.sprite.posy = my.y;
 			my.sprite.posx = my.x;
 			set_anim_dep(my.dep.toString(), my.sprite, my);
+							layer_items.Clear();
 			//		layer_players.ctx.clearRect(0, 0, layer_players.canvas.width, layer_players.canvas.height);
-			layer_items.Clear();
-			layer_ui.Clear();
+
 			layer_fx.Clear();
 			for (i = 0; i < enemy.length; i++) {
 				e = enemy[i];
@@ -395,13 +413,15 @@
 				e = enemy[i];
 				e.sprite.Anim_start();
 			}
-
+			layer_ui.Clear();
 			my.sprite.Anim_start();
 			refresh_game();
 			setInterval(function() {
+
+				layer_items.Draw();
 				layer_players.Clear();
 				layer_players.Draw();
-			}, 25);
+			}, 50);
 		}
 
 		function set_anim_dep(dep, sprite, user) {

@@ -10,7 +10,7 @@ function Sprite(name, x , y, categorie)
 	this.z;
 	this.direction;
 	this.current_anim = "bad_down";
-	this.anim_speed = 25;
+	this.anim_speed = 50;
 	this.anim_frame;
 	this.anim_index = 0;
 	this.cat = categorie;

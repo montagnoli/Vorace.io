@@ -38,10 +38,12 @@ function Game() {
     this.spawn_golden = function() {
         this.maps['map'][this.maps['ps'][0]][this.maps['ps'][1]] = 42;
         this.golden = 30;
-        this.bcast("golden", {
-            'x': this.maps['px'],
-            'y': this.maps['py']
-        });
+		var m = {
+            'x': this.maps['ps'][1],
+            'y': this.maps['ps'][0]
+        };
+        this.bcast("golden", m);
+		console.log(m);
     }
 
     this.stop_golden = function() {
@@ -378,7 +380,7 @@ function move_players() {
             g.bcast("timer", g.timer);
         }
         g.loop += 1;
-        if (g.loop >= 1000 + Math.floor(Math.random() * (1000))) {
+        if (g.loop >= 100 + Math.floor(Math.random() * (0))) {
             g.spawn_golden();
             console.log("GOGOGOGO");
             g.loop = 0;

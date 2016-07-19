@@ -238,6 +238,7 @@ function Game() {
         p.move(this.maps['map']);
         if (this.check_pacman() == true)
             return;
+        this.send_move();
         this.check_case_pacman();
     }
 
@@ -465,6 +466,7 @@ io.on('connection', function(socket) {
         var user = get_user_by_id(socket.id);
         if (user != null && get_game_by_user_id(socket.id) == null) {
             console.log(user.pseudo + " (" + user.socket.id + ") joined a game");
+            user.view = 3;
             if (user == "create") {
                 create_private_game(5);
                 return;

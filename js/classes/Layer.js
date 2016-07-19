@@ -50,6 +50,8 @@ function Layer(contener,id, w, h, z)
 	canv.id = id;
 	canv.width = w;
 	canv.height = h;
+	this.width = w;
+	this.height = h;
 	document.getElementById(contener).appendChild(canv);
 	this.canvas = document.getElementById(canv.id);
 	this.ctx = this.canvas.getContext('2d');

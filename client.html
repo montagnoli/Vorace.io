@@ -104,6 +104,9 @@
 		}
 		//TODO Autoload tout ca, possible sans ajax ??????
 		create_img([
+			["ui_dead", "/img/ui/dead.png"],
+			["ui_ember", "/img/ui/ember.png"],
+			["ui_life", "/img/ui/life.png"],
 			["wall", "/img/Tiles/wall.png"],
 			["wall_limit", "/img/Tiles/wall_limit.png"],
 			["darkness", "/img/Tiles/darkness.png"],
@@ -215,17 +218,20 @@
 					if (my.role == "V") {
 						my.sprite = new Sprite("vorace");
 						my.sprite.current_anim = "nice_down";
-					} else
+					} else {
 						my.sprite = new Sprite("fantom")
-
+						my.sprite.anim_speed = 150;
+					}
 					layer_players.AddObjet(my.sprite);
 				} else {
 					enemy.unshift(new User(list['players'][i].id, list['players'][i].pseudo, list['players'][i].x, list['players'][i].y, list['players'][i].role));
 					if (enemy[0].role == "V") {
-						enemy[0].sprite = new Sprite("vorace")
+						enemy[0].sprite = new Sprite("vorace");
 						enemy[0].sprite.current_anim = "nice_down";
-					} else
-						enemy[0].sprite = new Sprite("fantom")
+					} else {
+						enemy[0].sprite = new Sprite("fantom");
+						enemy[0].sprite.anim_speed = 150;
+					}
 					layer_players.AddObjet(enemy[0].sprite);
 				}
 			}
@@ -237,37 +243,52 @@
 		});
 
 		socket.on('end_game', function(msg) {
-				my = null;
-				ingame = false;
-				enemy = [];
-				move = 0;
-				timer = 0;
-				//UI
-				layer_ui.ctx.shadowColor = "yellow";
-				layer_ui.ctx.shadowBlur = 10;
-				layer_ui.ctx.font = "50px Arial";
-				layer_ui.ctx.fillStyle = "black";
-				layer_ui.ctx.fillText(msg, 448, 224);
-				layer_ui.ctx.font = "30px Arial";
-				layer_ui.ctx.fillText("Press Enter for replay !", 448, 672);
-				layer_ui.ctx.shadowBlur = 10;
-			})
-			//TODO trouver des images
-		socket.on('life', function(life) {
-			layer_ui.ctx.clearRect(0, 896, layer_ui.w, layer_ui.h);
-			if (life == 0) {
-				putimage(layer_ui.ctx, "pdead", 448 - 128, 448 - 128, 256, 256);
-				return;
-			}
+			my = null;
+			ingame = false;
+			enemy = [];
+			move = 0;
+			timer = 0;
 			//UI
-			layer_ui.ctx.font = "30px Arial";
 			layer_ui.ctx.shadowColor = "yellow";
 			layer_ui.ctx.shadowBlur = 10;
+			layer_ui.ctx.font = "50px Arial";
+			layer_ui.ctx.fillStyle = "black";
+			layer_ui.ctx.fillText(msg, 448, 224);
+			layer_ui.ctx.font = "30px Arial";
+			layer_ui.ctx.fillText("Press Enter for replay !", 448, 672);
+			layer_ui.ctx.shadowBlur = 10;
+		});
+		//TODO trouver des images
+		socket.on('life', function(life) {
+			//	layer_ui.ctx.clearRect(0, 896, layer_ui.w, layer_ui.height);
+			layer_ui.ctx.strokeStyle = "white";
+			console.log("LAYER UI");
+			console.log(layer_ui.height);
+			layer_ui.ctx.clearRect(400, layer_ui.height - 32, 100, layer_ui.height);
+			layer_ui.ctx.font = "30px Arial";
+			layer_ui.ctx.shadowColor = "yellow";
+			layer_ui.ctx.shadowBlur = 4;
 			layer_ui.ctx.fillStyle = "black";
 			layer_ui.ctx.fillText((life - 1), 448, 924);
 			layer_ui.ctx.shadowBlur = 0;
-			putimage(layer_ui.ctx, "wait", 460, 900, 32, 32);
-		})
+			if (life == 0) {
+				putimage(layer_ui.ctx, "ui_dead", 448 - 128, 448 - 128, 256, 256);
+				return;
+			}
+			putimage(layer_ui.ctx, "ui_life", 450, 900, 32, 32);
+		});
+		socket.on('ember', function(ember) {
+			layer_ui.ctx.strokeStyle = "white";
+			layer_ui.ctx.clearRect(200, layer_ui.height - 32, 150, layer_ui.height);
+			//UI
+			layer_ui.ctx.font = "30px Arial";
+			layer_ui.ctx.shadowColor = "yellow";
+			layer_ui.ctx.shadowBlur = 4;
+			layer_ui.ctx.fillStyle = "black";
+			layer_ui.ctx.fillText(ember, 250, 924);
+			layer_ui.ctx.shadowBlur = 0;
+			putimage(layer_ui.ctx, "ui_ember", 280, 900, 32, 32);
+		});
 
 		function light(x, y, nx, ny) {
 			var rand = Math.floor(Math.random() * 10)
@@ -295,19 +316,18 @@
 			layer_players.ctx.clearRect(0, 0, layer_players.canvas.width, layer_players.canvas.height);
 		}
 		var golden;
-		socket.on('golden', function (s) {
-			if (s !== false)
-				{
-					console.log("create golden");
-					console.log(s);
-					golden = layer_items.AddObjet(new Sprite("golden"));
-					golden.posy = s['y'];
-					golden.posx = s['x'];
-					golden.current_anim = "shine";
-					console.log(golden);
-					golden.Anim_start();
-				}
-			else {
+		socket.on('golden', function(s) {
+			if (s !== false) {
+				console.log("create golden");
+				console.log(s);
+				golden = layer_items.AddObjet(new Sprite("golden"));
+				golden.posy = s['y'];
+				golden.posx = s['x'];
+				golden.current_anim = "shine";
+				console.log(golden);
+				golden.Anim_start();
+			} else {
+				layer_ui.ctx.clearRect(0, 896, layer_ui.w, layer_ui.height);
 				console.log("delete golden");
 				var i = layer_items.objects.indexOf(golden);
 				golden.Anim_stop();
@@ -334,7 +354,7 @@
 			my.sprite.posy = my.y;
 			my.sprite.posx = my.x;
 			set_anim_dep(my.dep.toString(), my.sprite, my);
-							layer_items.Clear();
+			layer_items.Clear();
 			//		layer_players.ctx.clearRect(0, 0, layer_players.canvas.width, layer_players.canvas.height);
 
 			layer_fx.Clear();
@@ -348,6 +368,8 @@
 			if (my.role == 'F') {
 				layer_fx.ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
 				layer_fx.ctx.fillRect(0, 0, layer_fx.canvas.width, layer_fx.canvas.height);
+				if (golden && golden.posx != -1)
+					light(golden.posx * tile_size + tile_size / 2, golden.posy * tile_size + tile_size / 2, (tile_size + 50), (tile_size + 50));
 				light(my.x * tile_size + tile_size / 2, my.y * tile_size + tile_size / 2, my.view * (tile_size + 50), my.view * (tile_size + 50));
 				for (i = 0; i < enemy.length; i++) {
 					e = enemy[i];
@@ -381,23 +403,21 @@
 						//putimage(layer_fx.ctx, "darkness", x * tile_size, y * tile_size, tile_size, tile_size);
 						continue;
 					}
-					if (tab[y][x] == 3)
-						img = "seringe";
-					else if (tab[y][x] == 1)
-						img = "ember";
-					else
-						img = "";
-					if (img != "") {
+					if (tab[y][x] == 3) {
+						putimage(layer_items.ctx, "seringe", x * tile_size, y * tile_size, tile_size, tile_size);
+					} else if (tab[y][x] == 1) {
 						var rand = Math.floor(Math.random() * 5)
-						putimage(layer_items.ctx, img, x * tile_size, y * tile_size, tile_size - rand, tile_size - rand);
+						putimage(layer_items.ctx, "ember", x * tile_size, y * tile_size, tile_size - rand, tile_size - rand);
 					}
+					if (golden && golden.posx != -1)
+						golden.Draw();
 					// layer_fx.ctx.save();
 					// layer_fx.ctx.shadowColor = 'yellow';
 					// layer_fx.ctx.shadowBlur = 30;
 					// layer_fx.ctx.globalCompositeOperation ="destination-in";
 					// putimage(layer_fx.ctx, img, x * tile_size, y * tile_size, tile_size, tile_size);
 					// layer_fx.ctx.restore();
-					//	}
+					//
 					//TODO il y a un glitch quand on se deplace parceque les interval de rafraichissement des animation et cette fonction qui se declenhe sous l'appel du seveur = fonction a detruire a 90%
 				}
 			}
@@ -417,7 +437,8 @@
 			my.sprite.Anim_start();
 			refresh_game();
 			setInterval(function() {
-
+				if (golden)
+					golden.Clear();
 				layer_items.Draw();
 				layer_players.Clear();
 				layer_players.Draw();
@@ -433,7 +454,7 @@
 				3: "right",
 				4: "down"
 			};
-		//	console.log(dep);
+			//	console.log(dep);
 			if (sprite.name == "vorace")
 				if (timer == 0)
 					sprite.current_anim = "nice_" + dep_tab[dep];
@@ -443,9 +464,9 @@
 				if (user.eats)
 					sprite.current_anim = "dead";
 				else if (timer == 0)
-					sprite.current_anim = "bad_" + dep_tab[dep];
-				else
-					sprite.current_anim = "nice_" + dep_tab[dep];
+				sprite.current_anim = "bad_" + dep_tab[dep];
+			else
+				sprite.current_anim = "nice_" + dep_tab[dep];
 		}
 		document.addEventListener('keydown', function(event) {
 			if (!ingame) {

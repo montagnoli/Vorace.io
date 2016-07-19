@@ -83,6 +83,10 @@ function Sprite(name, x , y, categorie)
 			}
 	}, 25);
 	}
+	this.Clear = function()
+	{
+			this.ctx.clearRect(this.posx * 32, this.posy * 32, 32, 32);
+	}
 	return (this);
 }
 

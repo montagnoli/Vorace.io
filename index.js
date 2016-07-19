@@ -8,8 +8,7 @@ var fs = require('fs');
 app.use('/img', express.static(__dirname + '/img'));
 app.use('/js', express.static(__dirname + '/js'));
 
-function get_map()
-{
+function get_map() {
     var c = fs.readFileSync("maps/LIST");
     var cjs = JSON.parse(c);
     var m = cjs['maps'][Math.floor(Math.random() * cjs['maps'].length)];
@@ -28,8 +27,7 @@ function Game() {
     this.golden = 0;
     this.stats = "W"; // W=wait I=in_progress P=private
 
-    this.bcast_pacman = function(type, send)
-    {
+    this.bcast_pacman = function(type, send) {
         for (var i = 0; i < this.players.length; i++) {
             var p = this.players[i];
             if (p.role == "V")
@@ -37,26 +35,26 @@ function Game() {
         }
     }
 
-    this.spawn_golden = function()
-    {
+    this.spawn_golden = function() {
         this.maps['map'][this.maps['ps'][0]][this.maps['ps'][1]] = 42;
         this.golden = 30;
-        this.bcast("golden", {'x': this.maps['px'], 'y': this.maps['py']});
+        this.bcast("golden", {
+            'x': this.maps['px'],
+            'y': this.maps['py']
+        });
     }
 
-    this.stop_golden = function()
-    {
+    this.stop_golden = function() {
         this.golden = 0;
         this.maps['map'][this.maps['ps'][0]][this.maps['ps'][1]] = 9;
         this.bcast("golden", false);
     }
 
-    this.bcast_fantome = function(type, send)
-    {
+    this.bcast_fantome = function(type, send) {
         for (var i = 0; i < this.players.length; i++) {
             var p = this.players[i];
             if (p == null)
-                return ;
+                return;
             if (p.role != "V")
                 p.socket.emit(type, send);
         }
@@ -68,48 +66,40 @@ function Game() {
         }
     }
 
-    this.check_case_fantome = function (u){
+    this.check_case_fantome = function(u) {
         var p = this.get_pacman();
-        if (p == null) return ;
+        if (p == null) return;
         var it = this.maps['map'][u.y][u.x];
-        if (u.x == p.x && u.y == p.y && this.timer != 0)
-        {
+        if (u.x == p.x && u.y == p.y && this.timer != 0) {
             u.eats = true;
             this.send_move();
         }
-        if (it == 2 && u.eats == true)
-        {
+        if (it == 2 && u.eats == true) {
             u.eats = false;
             this.send_move();
         }
-        if (it == 42)
-        {
+        if (it == 42) {
             u.view += 2;
             this.stop_golden();
         }
     };
 
-    this.check_case_pacman = function (){
+    this.check_case_pacman = function() {
         var p = this.get_pacman();
-        if (p == null) return ;
+        if (p == null) return;
         var it = this.maps['map'][p.y][p.x];
-        if (it == 3)
-        {
+        if (it == 3) {
             this.timer = 45;
             this.maps['map'][p.y][p.x] = 9;
-        }
-        else if (it == 1)
-        {
+        } else if (it == 1) {
             this.maps['map'][p.y][p.x] = 9;
             var count = this.count_pacdot();
             this.bcast("ember", count);
             if (count == 0)
-                end_game(this, 'Vorace (' + this.get_pacman().pseudo +') win !');
-        }
-        else if (it == 2)
+                end_game(this, 'Vorace (' + this.get_pacman().pseudo + ') win !');
+        } else if (it == 2)
             this.remove_life();
-        else if (it == 42)
-        {
+        else if (it == 42) {
             this.life += 2;
             this.timer = 45;
             this.bcast("life", this.life);
@@ -117,11 +107,11 @@ function Game() {
         }
     }
 
-    this.count_pacdot = function (){
+    this.count_pacdot = function() {
         var tab = this.maps['map'];
         var nb = 0;
         for (var y = 0; y < tab.length; y++) {
-    		for (var x = 0; x < tab[y].length; x++) {
+            for (var x = 0; x < tab[y].length; x++) {
                 if (tab[y][x] == 1)
                     nb++;
             }
@@ -129,17 +119,15 @@ function Game() {
         return (nb);
     }
 
-    this.remove_life = function()
-    {
+    this.remove_life = function() {
         this.life--;
         this.bcast("life", this.life);
         if (this.golden != 0)
             this.stop_golden();
         this.loop = 0;
-        if (this.life <= 0)
-        {
+        if (this.life <= 0) {
             end_game(this, 'Fantomes win !');
-            return ;
+            return;
         }
         var u = this.players;
         for (var i = 0; i < u.length; i++) {
@@ -155,16 +143,14 @@ function Game() {
         this.send_move();
     }
 
-    this.check_pacman = function()
-    {
+    this.check_pacman = function() {
         var p = this.get_pacman();
         for (var i = 0; i < this.players.length; i++) {
             var u = this.players[i];
             if (u == p) continue;
             if (p == null)
-                return ;
-            if (p.x == u.x && p.y == u.y && this.timer == 0 && u.eats == false)
-            {
+                return;
+            if (p.x == u.x && p.y == u.y && this.timer == 0 && u.eats == false) {
                 this.remove_life();
                 return true;
             }
@@ -172,23 +158,28 @@ function Game() {
         return false;
     }
 
-    this.get_view = function(mx, my, view)
-    {
+    this.get_view = function(mx, my, view) {
         var p = this.get_pacman();
         if (p == null)
-            return ;
+            return;
         var tab = this.maps['map'];
         var result = [];
         for (var y = 0; y < tab.length; y++) {
             for (var x = 0; x < tab[y].length; x++) {
                 if (Math.abs(mx - x) + Math.abs(my - y) <= view)
-                    result.push({"val": tab[y][x],"vorace": (p.x == x && p.y == y), "x": x, "y": y});
+                    result.push({
+                        "val": tab[y][x],
+                        "vorace": (p.x == x && p.y == y),
+                        "x": x,
+                        "y": y,
+                        "dep": p.dep
+                    });
             }
         }
         return (result);
     }
 
-    this.send_move = function(){
+    this.send_move = function() {
         var mp = [];
         var mf = [];
         for (var j = 0; j < this.players.length; j++) {
@@ -197,16 +188,18 @@ function Game() {
                 'id': p.socket.id.substring(2),
                 'x': p.x,
                 'y': p.y,
+                'dep': p.dep,
                 'eat': p.eats
             });
-            if (p.role != "V")
-            {
-                mf.push({'id': p.socket.id.substring(2),
-                'x': p.x,
-                'y': p.y,
-                'eat': p.eats,
-                'view-length': p.view,
-                'view' : this.get_view(p.x, p.y, p.view)
+            if (p.role != "V") {
+                mf.push({
+                    'id': p.socket.id.substring(2),
+                    'x': p.x,
+                    'y': p.y,
+                    'dep': p.dep,
+                    'eat': p.eats,
+                    'view-length': p.view,
+                    'view': this.get_view(p.x, p.y, p.view)
                 });
             }
         }
@@ -215,12 +208,17 @@ function Game() {
         //this.bcast("move", mp);
     }
 
-    this.list_players = function()
-    {
-        var r = {'players': [], 'required': this.max_players};
+    this.list_players = function() {
+        var r = {
+            'players': [],
+            'required': this.max_players
+        };
         for (var i = 0; i < this.players.length; i++) {
             var p = this.players[i];
-            r['players'].push({'id': p.socket.id.substring(2), 'pseudo': p.pseudo});
+            r['players'].push({
+                'id': p.socket.id.substring(2),
+                'pseudo': p.pseudo
+            });
         }
         this.bcast("list_player", r);
     }
@@ -236,11 +234,11 @@ function Game() {
             this.check_case_fantome(u);
         }
         if (this.check_pacman() == true)
-            return ;
+            return;
         p.move(this.maps['map']);
         this.send_move();
         if (this.check_pacman() == true)
-            return ;
+            return;
         this.check_case_pacman();
     }
 
@@ -313,18 +311,15 @@ app.get('/', function(req, res) {
 var users = [];
 var games = [new Game()];
 
-function get_game_by_id(id)
-{
-    for (var g in games)
-    {
+function get_game_by_id(id) {
+    for (var g in games) {
         if (g.id == id)
             return (g);
     }
     return (null);
 }
 
-function run_game(g)
-{
+function run_game(g) {
     var players = [];
     var u = g.players;
     var p = Math.floor(Math.random() * u.length);
@@ -355,20 +350,18 @@ function run_game(g)
     g.stats = "I";
 }
 
-function join_game(user, g)
-{
+function join_game(user, g) {
     g.players.push(user);
     g.list_players();
     if (g.players.length != g.max_players)
-        return ;
+        return;
     run_game(g);
     games.unshift(new Game());
 }
 
 function create_private_game(nb_pl) {
     var g = new Game();
-    if (nb_pl <= 1)
-    {
+    if (nb_pl <= 1) {
         return "";
     }
     g.max_players = nb_pl;
@@ -383,20 +376,17 @@ function move_players() {
         if (g.stats == "W" || g.stats == "P")
             continue;
         g.moveall();
-        if (g.timer != 0)
-        {
+        if (g.timer != 0) {
             g.timer--;
             g.bcast("timer", g.timer);
         }
         g.loop += 1;
-        if (g.loop >= 1000 + Math.floor(Math.random() * (1000)))
-        {
+        if (g.loop >= 1000 + Math.floor(Math.random() * (1000))) {
             g.spawn_golden();
             console.log("GOGOGOGO");
             g.loop = 0;
         }
-        if (g.golden != 0)
-        {
+        if (g.golden != 0) {
             g.golden--;
             if (g.golden == 0)
                 g.stop_golden();
@@ -406,10 +396,9 @@ function move_players() {
 var ticks = 0;
 setInterval(function() {
     move_players();
-    if (ticks == 1000)
-    {
-        console.log('Games: ' + (games.length - 1)  + ' - Players: ' + users.length);
-        fs.appendFile('log.txt', 'Games: ' + (games.length - 1)  + ' - Players: ' + users.length + "\n", 'utf8', function(err){});
+    if (ticks == 1000) {
+        console.log('Games: ' + (games.length - 1) + ' - Players: ' + users.length);
+        fs.appendFile('log.txt', 'Games: ' + (games.length - 1) + ' - Players: ' + users.length + "\n", 'utf8', function(err) {});
         ticks = 0;
     }
     ticks++;
@@ -431,15 +420,12 @@ function get_user_by_id(id) {
     return null;
 }
 
-function end_game(g, raison)
-{
-    if (g.stats == "I")
-    {
+function end_game(g, raison) {
+    if (g.stats == "I") {
         g.bcast("end_game", raison);
-        fs.appendFile('log.txt', raison + "\n", 'utf8', function(err){});
+        fs.appendFile('log.txt', raison + "\n", 'utf8', function(err) {});
         remove_matching(games, g);
-    }
-    else
+    } else
         g.list_players();
 }
 
@@ -457,10 +443,10 @@ io.on('connection', function(socket) {
     socket.on('disconnect', function() {
         console.log("Deco " + socket.id);
         var user = get_user_by_id(socket.id);
-		var g = get_game_by_user_id(socket.id);
-		if (g) {
+        var g = get_game_by_user_id(socket.id);
+        if (g) {
             remove_matching(g.players, user);
-			end_game(g, 'Player disconnect...');
+            end_game(g, 'Player disconnect...');
         }
         if (user)
             remove_matching(users, user);
@@ -480,10 +466,9 @@ io.on('connection', function(socket) {
         var user = get_user_by_id(socket.id);
         if (user != null && get_game_by_user_id(socket.id) == null) {
             console.log(user.pseudo + " (" + user.socket.id + ") joined a game");
-            if (user == "create")
-            {
+            if (user == "create") {
                 create_private_game(5);
-                return ;
+                return;
             }
             var g = get_game_by_id(type);
             if (g == null)
@@ -494,8 +479,7 @@ io.on('connection', function(socket) {
 
     socket.on('pseudo', function(name) {
         var user = get_user_by_id(socket.id);
-        if (user == null)
-        {
+        if (user == null) {
             users.push(new User(socket, name));
             console.log(socket.id + " has name <" + name + ">");
         }
@@ -506,3 +490,9 @@ io.on('connection', function(socket) {
 http.listen(3000, '0.0.0.0', function() {
     console.log('listening on *:3000');
 });
+
+// http.listen(3000,'127.0.0.1' || 'localhost',function() {
+//     console.log('Application worker ' + process.pid + ' started...');
+//   }
+//   );
+// http.listen(3000,'127.0.0.1')

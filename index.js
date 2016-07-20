@@ -22,7 +22,7 @@ function Game() {
     this.loop = 0;
     this.timer = 0;
     this.id = Math.floor(Math.random() * (99999999 - 10000000)) + 10000000;
-    this.max_players = 2;
+    this.max_players = 3;
     this.players = [];
     this.golden = 0;
     this.stats = "W"; // W=wait I=in_progress P=private
@@ -381,7 +381,7 @@ function move_players() {
             g.bcast("timer", g.timer);
         }
         g.loop += 1;
-        if (g.loop >= 100 + Math.floor(Math.random() * (0))) {
+        if (g.loop >= 1000 + Math.floor(Math.random() * (1000))) {
             g.spawn_golden();
             console.log("GOGOGOGO");
             g.loop = 0;

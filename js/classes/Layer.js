@@ -15,7 +15,7 @@ function Layout()
 		}
 	}
 		this.SetActive = function(true_or_false)
-		{console.log("Layout : " + this.active);
+		{//console.log("Layout : " + this.active);
 		for(var v in this.layers)
 			this.layers[v].SetActive(true_or_false);
 		this.active = true_or_false;
@@ -60,10 +60,7 @@ function Layer(contener,id, w, h, z)
 	this.AddObjet = function(object)
 	{
 		object.ctx = this.ctx;
-		if (object.name)
-			this.objects[object.name] = object;
-		else
-			this.objects.push(object);
+		this.objects.push(object);
 		return (object);
 	}
 	this.SetActive = function(true_or_false)
@@ -75,15 +72,17 @@ function Layer(contener,id, w, h, z)
 
 	}
 	this.Draw = function()
-	{
+	{		//console.log("DRAW :")
 		for (var v in this.objects){
+		//	console.log("object :")
+		//	console.log(this.objects[v])
 			this.objects[v].Draw();
 		}
 	}
 	var child = this;
 	this.canvas.onclick = function(e)
 	{
-		console.log(child.active);
+	//	console.log(child.active);
 		if (!child.active)
 			return;
 		var x = e.pageX - this.offsetLeft, y = e.pageY - this.offsetTop;

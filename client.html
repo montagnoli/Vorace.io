@@ -3,25 +3,30 @@
 
 <head>
 	<style>
-		body {
+	@media screen {
+		html, body {
 			background-color: black;
+			height: 100vw;
+    		margin: 0;
 		}
 
 		#contener {
-			width: 100%;
-			height: 100%;
+			position: relative;
+			/*width: 100vw;*/
+			min-height: 100vw;
 			display: flex;
 			flex-direction: row;
 			justify-content: center;
-			align-items: center;
+			border: 1px solid black;
 		}
 
 		#game {
 			position: relative;
+			width: 95vw;
+			max-height: 1000px;
 			/*https://css-tricks.com/snippets/css/a-guide-to-flexbox/*/
 			flex: 0 1 auto;
 			border: 1px solid black;
-			width: 50%;
 			box-shadow: 0px 0px 200px #ffed00;
 		}
 
@@ -33,10 +38,50 @@
 			image-rendering: optimize-contrast;
 			image-rendering: crisp-edges;
 			position: absolute;
-			left: 0;
-			top: 0;
+			left: 0px;
+			top: 0px;
 			display: block;
 		}
+	}
+	@media screen and (min-aspect-ratio:50/50){
+				html, body {
+					background-color: black;
+					height: 100vh;
+		    		margin: 0;
+				}
+
+				#contener {
+					position: relative;
+					min-height: 100vh;
+					display: flex;
+					flex-direction: row;
+					justify-content: center;
+					border: 1px solid black;
+				}
+
+				#game {
+					position: relative;
+					width: 95vh;
+					max-height: 100vh;
+					flex: 0 1 auto;
+					border: 1px solid black;
+					box-shadow: 0px 0px 200px #00ff00;
+				}
+
+				#game canvas {
+					width: 100%;
+					image-rendering: optimizeSpeed;
+					image-rendering: -moz-crisp-edges;
+					image-rendering: -webkit-optimize-contrast;
+					image-rendering: optimize-contrast;
+					image-rendering: crisp-edges;
+					position: absolute;
+					left: 0px;
+					top: 0px;
+					display: block;
+				}
+	}
+
 	</style>
 	<script type="text/javascript" src="js/classes/Character.js"></script>
 	<script type="text/javascript" src="js/classes/Player.js"></script>
@@ -104,6 +149,7 @@
 		}
 		//TODO Autoload tout ca, possible sans ajax ??????
 		create_img([
+			["halo", "/img/Fx/halo.png"],
 			["ui_dead", "/img/ui/dead.png"],
 			["ui_ember", "/img/ui/ember.png"],
 			["ui_life", "/img/ui/life.png"],
@@ -243,6 +289,12 @@
 		});
 
 		socket.on('end_game', function(msg) {
+			my.sprite.Anim_stop();
+			for (e of enemy)
+			{
+				e.sprite.Anim_stop();
+			}
+			layer_players.objects = [];
 			my = null;
 			ingame = false;
 			enemy = [];
@@ -257,25 +309,27 @@
 			layer_ui.ctx.font = "30px Arial";
 			layer_ui.ctx.fillText("Press Enter for replay !", 448, 672);
 			layer_ui.ctx.shadowBlur = 10;
+			clearInterval(game_interval_id);
 		});
 		//TODO trouver des images
 		socket.on('life', function(life) {
 			//	layer_ui.ctx.clearRect(0, 896, layer_ui.w, layer_ui.height);
 			layer_ui.ctx.strokeStyle = "white";
-			console.log("LAYER UI");
-			console.log(layer_ui.height);
+	//		console.log("LAYER UI");
+	//		console.log(layer_ui.height);
 			layer_ui.ctx.clearRect(400, layer_ui.height - 32, 100, layer_ui.height);
 			layer_ui.ctx.font = "30px Arial";
 			layer_ui.ctx.shadowColor = "yellow";
 			layer_ui.ctx.shadowBlur = 4;
 			layer_ui.ctx.fillStyle = "black";
+			if (life - 1 >= 0)
 			layer_ui.ctx.fillText((life - 1), 448, 924);
 			layer_ui.ctx.shadowBlur = 0;
 			if (life == 0) {
 				putimage(layer_ui.ctx, "ui_dead", 448 - 128, 448 - 128, 256, 256);
 				return;
 			}
-			putimage(layer_ui.ctx, "ui_life", 450, 900, 32, 32);
+			putimage(layer_ui.ctx, "ui_life", 460, 900, 32, 32);
 		});
 		socket.on('ember', function(ember) {
 			layer_ui.ctx.strokeStyle = "white";
@@ -318,17 +372,17 @@
 		var golden;
 		socket.on('golden', function(s) {
 			if (s !== false) {
-				console.log("create golden");
-				console.log(s);
+	//			console.log("create golden");
+	//			console.log(s);
 				golden = layer_items.AddObjet(new Sprite("golden"));
 				golden.posy = s['y'];
 				golden.posx = s['x'];
 				golden.current_anim = "shine";
-				console.log(golden);
+			//	console.log(golden);
 				golden.Anim_start();
 			} else {
 				layer_ui.ctx.clearRect(0, 896, layer_ui.w, layer_ui.height);
-				console.log("delete golden");
+		//		console.log("delete golden");
 				var i = layer_items.objects.indexOf(golden);
 				golden.Anim_stop();
 				golden.posx = -1;
@@ -360,6 +414,7 @@
 			layer_fx.Clear();
 			for (i = 0; i < enemy.length; i++) {
 				e = enemy[i];
+		//		console.log(e);
 				e.sprite.posx = e.x;
 				e.sprite.posy = e.y;
 				set_anim_dep(e.dep.toString(), e.sprite, e);
@@ -423,7 +478,7 @@
 			}
 		}
 		var refresh_rate = 100;
-
+		var game_interval_id;
 		function launch_game() {
 			timer = 0;
 			ingame = true;
@@ -436,11 +491,12 @@
 			layer_ui.Clear();
 			my.sprite.Anim_start();
 			refresh_game();
-			setInterval(function() {
+			game_interval_id = setInterval(function() {
 				if (golden)
 					golden.Clear();
-				layer_items.Draw();
 				layer_players.Clear();
+				putimage(layer_players.ctx, "halo", my.x * tile_size - 16, my.y * tile_size - 16, 64, 64);
+				layer_items.Draw();
 				layer_players.Draw();
 			}, 50);
 		}

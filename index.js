@@ -269,6 +269,16 @@ function User(socket, pseudo) {
     this.dep = 0;
     this.pdep = 0;
     this.view = 5;
+
+	this.score_kill_as_fantom = 0;
+	this.score_kill_as_vorace = 0;
+	this.score_kill_by_fantom = 0;
+	this.score_kill_by_vorace = 0;
+	this.score_eated_ember = 0;
+	this.score_eated_seringe = 0;
+	this.score_eated_golden = 0;
+
+
     this.move = function(tab) {
         //TODO pre-direction 1 case a l'avance seulement
         var t = false;

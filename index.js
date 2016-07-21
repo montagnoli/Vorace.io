@@ -334,9 +334,10 @@ function run_game(g) {
             u[i].x = g.maps['fs'][1];
             u[i].role = "F";
         }
+		console.log(g);
         players.push({
             'id': u[i].socket.id.substring(2),
-            'pseudo': u[i].name,
+            'pseudo': u[i].pseudo,
             "x": u[i].x,
             "y": u[i].y,
             "role": u[i].role

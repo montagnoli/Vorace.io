@@ -14,7 +14,7 @@
 		html, body {
 			background-color: black;
 			height: 100vw;
-    		margin: 0;
+			margin: 0;
 		}
 
 		#contener {
@@ -26,8 +26,6 @@
 			justify-content: space-around;
 			border: 1px solid black;
 		}
-
-
 
 		#users p {
 			color: #ffed00;
@@ -100,12 +98,14 @@
 	}
 
 	</style>
-	<script type="text/javascript" src="js/classes/Character.js"></script>
-	<script type="text/javascript" src="js/classes/Player.js"></script>
+ 	<!-- <script src="https://fb.me/react-15.0.0.js"></script>
+    <script src="https://fb.me/react-dom-15.0.0.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script> -->
+
 	<script type="text/javascript" src="js/classes/Layer.js"></script>
+	<script type="text/javascript" src="js/classes/Character.js"></script>
 	<script type="text/javascript" src="js/classes/Map.js"></script>
 	<script type="text/javascript" src="js/classes/Generic.js"></script>
-	<script type="text/javascript" src="js/classes/Menu.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
 </head>
 
@@ -116,6 +116,28 @@
 		Players in your room
 		</div>
 	</div>
+	<!-- <script type="text/babel">
+
+	var UserInfo = React.createClass({
+		render: function() {
+				<p>{this.props.message}</p>
+				<UserStats/>
+		}
+	})
+
+
+	var UsersPanel = React.createClass({
+		render: function() {
+
+		}
+	})
+
+	ReactDOM.render(
+		<UsersPanel>,
+		document.getElementById('users')
+      );
+
+	</script> -->
 	<script type="text/javascript">
 		var tile_size = 32;
 
@@ -276,12 +298,22 @@
 			}
 			refresh_game();
 		});
+		function ui_add_user(user) {
+			var user_name = document.createElement('p');
+			user_name.innerHTML = user.pseudo;
+			document.getElementById("users").appendChild(user_name);
+			var keys = user.stats.keys();
+			for stat in keys {
+				var user_stat = document.createElement('p');
+				user_stat.innnerHTML(stat);
+				user_name.appendChild(user_stat);
+			}
+		}
 
 		socket.on('start', function(list) {
+			document.getElementById("users").innerHTML = "";
 			for (i = 0; i < list['players'].length; i++) {
-				var user_div = document.createElement('p');
-				user_div.innerHTML = list['players'][i].pseudo;
-				document.getElementById("users").appendChild(user_div);
+				ui_add_user(list['players'][i]);
 				if (list['players'][i].id == socket.id) {
 					my = new User(list['players'][i].id, list['players'][i].pseudo, list['players'][i].x, list['players'][i].y, list['players'][i].role);
 					if (my.role == "V") {
@@ -336,10 +368,7 @@
 		});
 		//TODO trouver des images
 		socket.on('life', function(life) {
-			//	layer_ui.ctx.clearRect(0, 896, layer_ui.w, layer_ui.height);
 			layer_ui.ctx.strokeStyle = "white";
-	//		console.log("LAYER UI");
-	//		console.log(layer_ui.height);
 			layer_ui.ctx.clearRect(400, layer_ui.height - 32, 100, layer_ui.height);
 			layer_ui.ctx.font = "30px Arial";
 			layer_ui.ctx.shadowColor = "yellow";
@@ -376,16 +405,6 @@
 			putimage(layer_fx.ctx, "light2", x - nx / 2, y - ny / 2, nx - rand, ny - rand);
 			layer_fx.ctx.restore();
 		}
-		// function putimage(ctx, path, x, y, nx, ny) {
-		// 	//	var image = new Image();
-		// 	//	image.src = path;
-		// 	var image = get_img(path);
-		// 	if (path == "pbad") {
-		// 		nx = 60;
-		// 		x = x - 30;
-		// 	}
-		// 	ctx.drawImage(image, x, y, nx, ny);
-		// }
 
 		function clear_game() {
 			layer_players.ctx.clearRect(0, 0, layer_players.canvas.width, layer_players.canvas.height);
@@ -395,17 +414,13 @@
 		var golden;
 		socket.on('golden', function(s) {
 			if (s !== false) {
-	//			console.log("create golden");
-	//			console.log(s);
 				golden = layer_items.AddObjet(new Sprite("golden"));
 				golden.posy = s['y'];
 				golden.posx = s['x'];
 				golden.current_anim = "shine";
-			//	console.log(golden);
 				golden.Anim_start();
 			} else {
 				layer_ui.ctx.clearRect(0, 896, layer_ui.w, layer_ui.height);
-		//		console.log("delete golden");
 				var i = layer_items.objects.indexOf(golden);
 				golden.Anim_stop();
 				golden.posx = -1;
@@ -417,10 +432,6 @@
 		function refresh_game() {
 			// Create gradient
 			//TODO 80ct val
-			//TODO tout refaire le mode de rendu
-			//TODO Gerer la direction et afficher les personnages en consequence
-			//TODO Animation
-			//TODO bordure sur les murs
 			//IDEA Effet sonore
 			//TODO Chat + log de qui a gagne quoi
 			//IDEA differencier les fantomes
@@ -475,12 +486,8 @@
 						}
 					} else
 						get = true;
-					if (get == false) {
-
-						//CHANGED effet rigolo quand le fantome bouge mais consome peut etre
-						//putimage(layer_fx.ctx, "darkness", x * tile_size, y * tile_size, tile_size, tile_size);
+					if (get == false)
 						continue;
-					}
 					if (tab[y][x] == 3) {
 						putimage(layer_items.ctx, "seringe", x * tile_size, y * tile_size, tile_size, tile_size);
 					} else if (tab[y][x] == 1) {
@@ -489,14 +496,6 @@
 					}
 					if (golden && golden.posx != -1)
 						golden.Draw();
-					// layer_fx.ctx.save();
-					// layer_fx.ctx.shadowColor = 'yellow';
-					// layer_fx.ctx.shadowBlur = 30;
-					// layer_fx.ctx.globalCompositeOperation ="destination-in";
-					// putimage(layer_fx.ctx, img, x * tile_size, y * tile_size, tile_size, tile_size);
-					// layer_fx.ctx.restore();
-					//
-					//TODO il y a un glitch quand on se deplace parceque les interval de rafraichissement des animation et cette fonction qui se declenhe sous l'appel du seveur = fonction a detruire a 90%
 				}
 			}
 		}

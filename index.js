@@ -502,6 +502,10 @@ io.on('connection', function(socket) {
 http.listen(3000, '0.0.0.0', function() {
     console.log('listening on *:3000');
 });
+var http2 = require('http').Server(app);
+http2.listen(3001, '0.0.0.0', function() {
+    console.log('listening on *:3000');
+});
 
 // http.listen(3000,'127.0.0.1' || 'localhost',function() {
 //     console.log('Application worker ' + process.pid + ' started...');

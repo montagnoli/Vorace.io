@@ -73,15 +73,24 @@ function Sprite(name, x , y, categorie)
 		var step = time / 25;
 		var count = 0;
 		var move_interval_id = setInterval(function () {
-			that.movex += (that.posx - x)  / step;
-			that.movey += (that.posy - y)  / step;
+
+			that.movex += 	that.posx  - (x / tile_size)   / step;
+			that.movey +=  	that.posy  - (y / tile_size)   / step;
+			console.log(that.movey);
 			count++;
-			if (count == step)
+			if (count == step )
 			{
+			console.log( "pos" + (that.posx * tile_size  + that.movex));
+
 				clearInterval(move_interval_id)
-				that.posy = y;
-				that.posx = x;
+
+				that.posy = Math.round(((that.posy * tile_size) + that.movey) / tile_size);
+				that.posx = Math.round(((that.posx * tile_size) + that.movex) / tile_size);
+				that.movex = 0;
+				that.movey = 0;
+				console.log("posx" + that.posx);
 			}
+
 	}, 25);
 	}
 	this.Clear = function()

@@ -139,13 +139,14 @@
 
 	</script> -->
 	<script type="text/javascript">
+		// "use strict"
 		var tile_size = 32;
 
-		layer_ui = new Layer("game", 'ui', 896, 928, 6);
-		layer_players = new Layer("game", 'players', 896, 896, 4);
-		layer_map = new Layer("game", 'map', 896, 896, 1);
-		layer_items = new Layer("game", 'items', 896, 896, 3);
-		layer_fx = new Layer("game", 'fx', 896, 896, 5);
+		var layer_ui = new Layer("game", 'ui', 896, 928, 6);
+		var layer_players = new Layer("game", 'players', 896, 896, 4);
+		var layer_map = new Layer("game", 'map', 896, 896, 1);
+		var layer_items = new Layer("game", 'items', 896, 896, 3);
+		var layer_fx = new Layer("game", 'fx', 896, 896, 5);
 		//	var vorace = layer_players.AddObjet(new Sprite("vorace", 0, 0, "players"));
 		//console.log(vorace);
 		//	vorace.current_anim = "nice_down";
@@ -298,22 +299,22 @@
 			}
 			refresh_game();
 		});
-		function ui_add_user(user) {
-			var user_name = document.createElement('p');
-			user_name.innerHTML = user.pseudo;
-			document.getElementById("users").appendChild(user_name);
-			var keys = user.stats.keys();
-			for stat in keys {
-				var user_stat = document.createElement('p');
-				user_stat.innnerHTML(stat);
-				user_name.appendChild(user_stat);
-			}
-		}
+		// function ui_add_user(user) {
+		// 	var user_name = document.createElement('p');
+		// 	user_name.innerHTML = user.pseudo;
+		// 	document.getElementById("users").appendChild(user_name);
+		// 	var keys = user.stats.keys();
+		// 	for (stat in keys) {
+		// 		var user_stat = document.createElement('p');
+		// 		user_stat.innnerHTML();
+		// 		user_name.appendChild(user_stat);
+		// 	}
+		// }
 
 		socket.on('start', function(list) {
 			document.getElementById("users").innerHTML = "";
 			for (i = 0; i < list['players'].length; i++) {
-				ui_add_user(list['players'][i]);
+				//ui_add_user(list['players'][i]);
 				if (list['players'][i].id == socket.id) {
 					my = new User(list['players'][i].id, list['players'][i].pseudo, list['players'][i].x, list['players'][i].y, list['players'][i].role);
 					if (my.role == "V") {

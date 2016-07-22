@@ -324,6 +324,8 @@
 						my.sprite = new Sprite("fantom")
 						my.sprite.anim_speed = 150;
 					}
+					my.sprite.posx = my.x;
+					my.sprite.posy = my.y;
 					layer_players.AddObjet(my.sprite);
 				} else {
 					enemy.unshift(new User(list['players'][i].id, list['players'][i].pseudo, list['players'][i].x, list['players'][i].y, list['players'][i].role));
@@ -334,6 +336,8 @@
 						enemy[0].sprite = new Sprite("fantom");
 						enemy[0].sprite.anim_speed = 150;
 					}
+					enemy[0].sprite.posx = enemy[0].x;
+					enemy[0].sprite.posy = enemy[0].y;
 					layer_players.AddObjet(enemy[0].sprite);
 				}
 			}
@@ -440,8 +444,9 @@
 			//IDEA tableau de score et systeme de round
 			var tab = map.field;
 			//my.sprite.Move(my.x, my.y, 125)
-			my.sprite.posy = my.y;
-			my.sprite.posx = my.x;
+				my.sprite.posx = my.x;
+				my.sprite.posy = my.y;
+			//my.sprite.Move(my.x * tile_size, my.y * tile_size, 100);
 			set_anim_dep(my.dep.toString(), my.sprite, my);
 			layer_items.Clear();
 			//		layer_players.ctx.clearRect(0, 0, layer_players.canvas.width, layer_players.canvas.height);
@@ -452,6 +457,7 @@
 		//		console.log(e);
 				e.sprite.posx = e.x;
 				e.sprite.posy = e.y;
+			//	e.sprite.Move(e.x * tile_size, e.y * tile_size, 100);
 				set_anim_dep(e.dep.toString(), e.sprite, e);
 			}
 			//		lumiere pour les fantomes;

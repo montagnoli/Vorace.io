@@ -138,6 +138,38 @@
       );
 
 	</script> -->
+	<!-- <script type="text/javascript">
+	var tile_size = 32;
+		var images = {};
+			function create_img(tab) {
+				for (var i = 0; i < tab.length; i++) {
+					var img = new Image();
+					var name = tab[i][0];
+					img.src = tab[i][1];
+					console.log('create :' + img.src);
+					img.onload = function() {
+						console.log('load : ' + this.src);
+					};
+					images[name] = img;
+				}
+			}
+			//TODO Autoload tout ca, possible sans ajax ??????
+			create_img([["vorace_bad_down", "/img/vorace/bad_down.png"]]);
+
+		var layer = new Layer("game", 'ui', 896, 928, 6);
+		var vorace = new Sprite("vorace", 10, 10);
+		layer.AddObjet(vorace);
+		vorace.Anim_start();
+vorace.Move(11 * tile_size, 10 * tile_size, 125);
+		setInterval(function(){
+			layer.Clear();
+			layer.Draw();
+		}, 25)
+	</script> -->
+
+
+
+
 	<script type="text/javascript">
 		// "use strict"
 		var tile_size = 32;
@@ -307,19 +339,19 @@
 				}
 		}
 
-		function ui_add_user(user) {
-			var user_name = document.createElement('p');
-			user_name.setAttribute("id", user.);
-			user_name.innerHTML = user.pseudo;
-			document.getElementById("users").appendChild(user_name);
-			var keys = user.stats.keys();
-			for (stat in keys) {
-				var user_stat = document.createElement('p');
-				user_stat.setAttribute("class", stat);
-				user_stat.innnerHTML();
-				user_name.appendChild(user_stat);
-			}
-		}
+		// function ui_add_user(user) {
+		// 	var user_name = document.createElement('p');
+		// 	user_name.setAttribute("id", user.);
+		// 	user_name.innerHTML = user.pseudo;
+		// 	document.getElementById("users").appendChild(user_name);
+		// 	var keys = user.stats.keys();
+		// 	for (stat in keys) {
+		// 		var user_stat = document.createElement('p');
+		// 		user_stat.setAttribute("class", stat);
+		// 		user_stat.innnerHTML();
+		// 		user_name.appendChild(user_stat);
+		// 	}
+		// }
 
 		socket.on('start', function(list) {
 			for (i = 0; i < list['players'].length; i++) {
@@ -442,7 +474,15 @@
 				layer_items.objects.splice(i, 1);
 			}
 		});
+		var can_move = 1;
+		setInterval(function () {
+			if (can_move) {
+				can_move = 0;
+			}
+			else
+					can_move = 1;
 
+		}, 125)
 		function refresh_game() {
 			// Create gradient
 			//TODO 80ct val
@@ -452,10 +492,11 @@
 			//TODO (v1) Meilleur affichage en cas de victoire
 			//IDEA tableau de score et systeme de round
 			var tab = map.field;
-			//my.sprite.Move(my.x, my.y, 125)
-				my.sprite.posx = my.x;
-				my.sprite.posy = my.y;
-			//my.sprite.Move(my.x * tile_size, my.y * tile_size, 100);
+				// my.sprite.posx = my.x;
+				// my.sprite.posy = my.y;
+						console.log(my)
+			//if ((my.x != my.sprite.posx || my.y != my.sprite.posy))
+					my.sprite.Move(my.x * tile_size, my.y * tile_size, 100);
 			set_anim_dep(my.dep.toString(), my.sprite, my);
 			layer_items.Clear();
 			//		layer_players.ctx.clearRect(0, 0, layer_players.canvas.width, layer_players.canvas.height);
@@ -464,9 +505,9 @@
 			for (i = 0; i < enemy.length; i++) {
 				e = enemy[i];
 		//		console.log(e);
-				e.sprite.posx = e.x;
-				e.sprite.posy = e.y;
-			//	e.sprite.Move(e.x * tile_size, e.y * tile_size, 100);
+				// e.sprite.posx = e.x;
+				// e.sprite.posy = e.y;
+				e.sprite.Move(e.x * tile_size, e.y * tile_size, 100);
 				set_anim_dep(e.dep.toString(), e.sprite, e);
 			}
 			//		lumiere pour les fantomes;
@@ -533,7 +574,7 @@
 				if (golden)
 					golden.Clear();
 				layer_players.Clear();
-				putimage(layer_players.ctx, "halo", my.x * tile_size - 16, my.y * tile_size - 16, 64, 64);
+				putimage(layer_players.ctx, "halo", my.sprite.posx * tile_size - 16 + my.sprite.movex, my.sprite.posy * tile_size - 16  + my.sprite.movey, 64, 64);
 				layer_items.Draw();
 				layer_players.Draw();
 			}, 50);
@@ -580,6 +621,7 @@
 			socket.emit('move', my.dep);
 		});
 	</script>
+
 </body>
 
 </html>

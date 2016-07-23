@@ -299,20 +299,29 @@
 			}
 			refresh_game();
 		});
-		// function ui_add_user(user) {
-		// 	var user_name = document.createElement('p');
-		// 	user_name.innerHTML = user.pseudo;
-		// 	document.getElementById("users").appendChild(user_name);
-		// 	var keys = user.stats.keys();
-		// 	for (stat in keys) {
-		// 		var user_stat = document.createElement('p');
-		// 		user_stat.innnerHTML();
-		// 		user_name.appendChild(user_stat);
-		// 	}
-		// }
+		function ui_update_stat(update) {
+			for (var id in update)
+				for (var stat in update[id]) {
+						var to_update = document.getElementById(id).getElementsByClassName(stat)
+						to_update.innerHTML = update[id][stat];
+				}
+		}
+
+		function ui_add_user(user) {
+			var user_name = document.createElement('p');
+			user_name.setAttribute("id", user.);
+			user_name.innerHTML = user.pseudo;
+			document.getElementById("users").appendChild(user_name);
+			var keys = user.stats.keys();
+			for (stat in keys) {
+				var user_stat = document.createElement('p');
+				user_stat.setAttribute("class", stat);
+				user_stat.innnerHTML();
+				user_name.appendChild(user_stat);
+			}
+		}
 
 		socket.on('start', function(list) {
-			document.getElementById("users").innerHTML = "";
 			for (i = 0; i < list['players'].length; i++) {
 				//ui_add_user(list['players'][i]);
 				if (list['players'][i].id == socket.id) {

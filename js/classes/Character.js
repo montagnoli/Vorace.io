@@ -3,8 +3,8 @@ function Sprite(name, x , y, categorie)
 	"use strict";
 	this.name = name;
 	this.ctx;
-	this.posx; //coordonee sur la map
-	this.posy; //idem
+	this.posx = x; //coordonee sur la map
+	this.posy = y; //idem
 	this.x = x;
 	this.y = y;
 	this.z;
@@ -64,33 +64,33 @@ function Sprite(name, x , y, categorie)
 	this.movey = 0;
 	this.prevx = 0;
 	this.prevy = 0;
+    var move_interval_id;
+	this.Move = function(x, y, time) {
+		clearInterval(move_interval_id)
+		that.posy = Math.round(((that.posy * tile_size) + that.movey) / tile_size);
+		that.posx = Math.round(((that.posx * tile_size) + that.movex) / tile_size);
+		that.movex = 0;
+		that.movey = 0;
+        var step = time / 25;
+        var count = 0;
+       	move_interval_id = setInterval(function() {
+            that.movex += (x - that.posx * tile_size) / step;
+            that.movey += (y - that.posy * tile_size) / step;
+				//		console.log(that);
 
-	this.Move = function(x, y, time)
-	{
-		this.prevx = this.posx;
-		this.prevy = this.posy;
-		var move_interval_id;
-		var step = time / 25;
-		var count = 0;
-		var move_interval_id = setInterval(function () {
-			that.movex += (that.posx - x)  / step;
-			that.movey += (that.posy - y)  / step;
-			count++;
-			if (count == step)
-			{
-				clearInterval(move_interval_id)
-				that.posy = y;
-				that.posx = x;
-			}
-	}, 25);
-	}
+            count++;
+            if (count == step) {
+                clearInterval(move_interval_id)
+                that.posy = Math.round(((that.posy * tile_size) + that.movey) / tile_size);
+                that.posx = Math.round(((that.posx * tile_size) + that.movex) / tile_size);
+                that.movex = 0;
+                that.movey = 0;
+            }
+        }, 25);
+    }
 	this.Clear = function()
 	{
 			this.ctx.clearRect(this.posx * 32, this.posy * 32, 32, 32);
 	}
 	return (this);
 }
-
-
-
-

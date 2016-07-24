@@ -14,7 +14,7 @@
 		html, body {
 			background-color: black;
 			height: 100vw;
-    		margin: 0;
+			margin: 0;
 		}
 
 		#contener {
@@ -26,8 +26,6 @@
 			justify-content: space-around;
 			border: 1px solid black;
 		}
-
-
 
 		#users p {
 			color: #ffed00;
@@ -100,12 +98,14 @@
 	}
 
 	</style>
-	<script type="text/javascript" src="js/classes/Character.js"></script>
-	<script type="text/javascript" src="js/classes/Player.js"></script>
+ 	<!-- <script src="https://fb.me/react-15.0.0.js"></script>
+    <script src="https://fb.me/react-dom-15.0.0.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script> -->
+
 	<script type="text/javascript" src="js/classes/Layer.js"></script>
+	<script type="text/javascript" src="js/classes/Character.js"></script>
 	<script type="text/javascript" src="js/classes/Map.js"></script>
 	<script type="text/javascript" src="js/classes/Generic.js"></script>
-	<script type="text/javascript" src="js/classes/Menu.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
 </head>
 
@@ -116,14 +116,69 @@
 		Players in your room
 		</div>
 	</div>
+	<!-- <script type="text/babel">
+
+	var UserInfo = React.createClass({
+		render: function() {
+				<p>{this.props.message}</p>
+				<UserStats/>
+		}
+	})
+
+
+	var UsersPanel = React.createClass({
+		render: function() {
+
+		}
+	})
+
+	ReactDOM.render(
+		<UsersPanel>,
+		document.getElementById('users')
+      );
+
+	</script> -->
+	<!-- <script type="text/javascript">
+	var tile_size = 32;
+		var images = {};
+			function create_img(tab) {
+				for (var i = 0; i < tab.length; i++) {
+					var img = new Image();
+					var name = tab[i][0];
+					img.src = tab[i][1];
+					console.log('create :' + img.src);
+					img.onload = function() {
+						console.log('load : ' + this.src);
+					};
+					images[name] = img;
+				}
+			}
+			//TODO Autoload tout ca, possible sans ajax ??????
+			create_img([["vorace_bad_down", "/img/vorace/bad_down.png"]]);
+
+		var layer = new Layer("game", 'ui', 896, 928, 6);
+		var vorace = new Sprite("vorace", 10, 10);
+		layer.AddObjet(vorace);
+		vorace.Anim_start();
+vorace.Move(11 * tile_size, 10 * tile_size, 125);
+		setInterval(function(){
+			layer.Clear();
+			layer.Draw();
+		}, 25)
+	</script> -->
+
+
+
+
 	<script type="text/javascript">
+		// "use strict"
 		var tile_size = 32;
-		var log_players = [];
-		layer_ui = new Layer("game", 'ui', 896, 928, 6);
-		layer_players = new Layer("game", 'players', 896, 896, 4);
-		layer_map = new Layer("game", 'map', 896, 896, 1);
-		layer_items = new Layer("game", 'items', 896, 896, 3);
-		layer_fx = new Layer("game", 'fx', 896, 896, 5);
+
+		var layer_ui = new Layer("game", 'ui', 896, 928, 6);
+		var layer_players = new Layer("game", 'players', 896, 896, 4);
+		var layer_map = new Layer("game", 'map', 896, 896, 1);
+		var layer_items = new Layer("game", 'items', 896, 896, 3);
+		var layer_fx = new Layer("game", 'fx', 896, 896, 5);
 		//	var vorace = layer_players.AddObjet(new Sprite("vorace", 0, 0, "players"));
 		//console.log(vorace);
 		//	vorace.current_anim = "nice_down";
@@ -276,9 +331,31 @@
 			}
 			refresh_game();
 		});
+		function ui_update_stat(update) {
+			for (var id in update)
+				for (var stat in update[id]) {
+						var to_update = document.getElementById(id).getElementsByClassName(stat)
+						to_update.innerHTML = update[id][stat];
+				}
+		}
+
+		// function ui_add_user(user) {
+		// 	var user_name = document.createElement('p');
+		// 	user_name.setAttribute("id", user.);
+		// 	user_name.innerHTML = user.pseudo;
+		// 	document.getElementById("users").appendChild(user_name);
+		// 	var keys = user.stats.keys();
+		// 	for (stat in keys) {
+		// 		var user_stat = document.createElement('p');
+		// 		user_stat.setAttribute("class", stat);
+		// 		user_stat.innnerHTML();
+		// 		user_name.appendChild(user_stat);
+		// 	}
+		// }
 
 		socket.on('start', function(list) {
 			for (i = 0; i < list['players'].length; i++) {
+<<<<<<< HEAD
 				var t = false
 				for (var j = 0; j < log_players.length; j++) {
 					if (log_players[j] == list['players'][j])
@@ -290,6 +367,9 @@
 					user_div.innerHTML = list['players'][i].pseudo;
 					document.getElementById("users").appendChild(user_div);
 				}
+=======
+				//ui_add_user(list['players'][i]);
+>>>>>>> e48188edd48784853cffc37c0c3680748f58dddc
 				if (list['players'][i].id == socket.id) {
 					my = new User(list['players'][i].id, list['players'][i].pseudo, list['players'][i].x, list['players'][i].y, list['players'][i].role);
 					if (my.role == "V") {
@@ -299,6 +379,8 @@
 						my.sprite = new Sprite("fantom")
 						my.sprite.anim_speed = 150;
 					}
+					my.sprite.posx = my.x;
+					my.sprite.posy = my.y;
 					layer_players.AddObjet(my.sprite);
 				} else {
 					enemy.unshift(new User(list['players'][i].id, list['players'][i].pseudo, list['players'][i].x, list['players'][i].y, list['players'][i].role));
@@ -309,6 +391,8 @@
 						enemy[0].sprite = new Sprite("fantom");
 						enemy[0].sprite.anim_speed = 150;
 					}
+					enemy[0].sprite.posx = enemy[0].x;
+					enemy[0].sprite.posy = enemy[0].y;
 					layer_players.AddObjet(enemy[0].sprite);
 				}
 			}
@@ -344,10 +428,7 @@
 		});
 		//TODO trouver des images
 		socket.on('life', function(life) {
-			//	layer_ui.ctx.clearRect(0, 896, layer_ui.w, layer_ui.height);
 			layer_ui.ctx.strokeStyle = "white";
-	//		console.log("LAYER UI");
-	//		console.log(layer_ui.height);
 			layer_ui.ctx.clearRect(400, layer_ui.height - 32, 100, layer_ui.height);
 			layer_ui.ctx.font = "30px Arial";
 			layer_ui.ctx.shadowColor = "yellow";
@@ -384,16 +465,6 @@
 			putimage(layer_fx.ctx, "light2", x - nx / 2, y - ny / 2, nx - rand, ny - rand);
 			layer_fx.ctx.restore();
 		}
-		// function putimage(ctx, path, x, y, nx, ny) {
-		// 	//	var image = new Image();
-		// 	//	image.src = path;
-		// 	var image = get_img(path);
-		// 	if (path == "pbad") {
-		// 		nx = 60;
-		// 		x = x - 30;
-		// 	}
-		// 	ctx.drawImage(image, x, y, nx, ny);
-		// }
 
 		function clear_game() {
 			layer_players.ctx.clearRect(0, 0, layer_players.canvas.width, layer_players.canvas.height);
@@ -403,17 +474,13 @@
 		var golden;
 		socket.on('golden', function(s) {
 			if (s !== false) {
-	//			console.log("create golden");
-	//			console.log(s);
 				golden = layer_items.AddObjet(new Sprite("golden"));
 				golden.posy = s['y'];
 				golden.posx = s['x'];
 				golden.current_anim = "shine";
-			//	console.log(golden);
 				golden.Anim_start();
 			} else {
 				layer_ui.ctx.clearRect(0, 896, layer_ui.w, layer_ui.height);
-		//		console.log("delete golden");
 				var i = layer_items.objects.indexOf(golden);
 				golden.Anim_stop();
 				golden.posx = -1;
@@ -421,23 +488,29 @@
 				layer_items.objects.splice(i, 1);
 			}
 		});
+		var can_move = 1;
+		setInterval(function () {
+			if (can_move) {
+				can_move = 0;
+			}
+			else
+					can_move = 1;
 
+		}, 125)
 		function refresh_game() {
 			// Create gradient
 			//TODO 80ct val
-			//TODO tout refaire le mode de rendu
-			//TODO Gerer la direction et afficher les personnages en consequence
-			//TODO Animation
-			//TODO bordure sur les murs
 			//IDEA Effet sonore
 			//TODO Chat + log de qui a gagne quoi
 			//IDEA differencier les fantomes
 			//TODO (v1) Meilleur affichage en cas de victoire
 			//IDEA tableau de score et systeme de round
 			var tab = map.field;
-			//my.sprite.Move(my.x, my.y, 125)
-			my.sprite.posy = my.y;
-			my.sprite.posx = my.x;
+				// my.sprite.posx = my.x;
+				// my.sprite.posy = my.y;
+						console.log(my)
+			//if ((my.x != my.sprite.posx || my.y != my.sprite.posy))
+					my.sprite.Move(my.x * tile_size, my.y * tile_size, 100);
 			set_anim_dep(my.dep.toString(), my.sprite, my);
 			layer_items.Clear();
 			//		layer_players.ctx.clearRect(0, 0, layer_players.canvas.width, layer_players.canvas.height);
@@ -446,8 +519,9 @@
 			for (i = 0; i < enemy.length; i++) {
 				e = enemy[i];
 		//		console.log(e);
-				e.sprite.posx = e.x;
-				e.sprite.posy = e.y;
+				// e.sprite.posx = e.x;
+				// e.sprite.posy = e.y;
+				e.sprite.Move(e.x * tile_size, e.y * tile_size, 100);
 				set_anim_dep(e.dep.toString(), e.sprite, e);
 			}
 			//		lumiere pour les fantomes;
@@ -483,12 +557,8 @@
 						}
 					} else
 						get = true;
-					if (get == false) {
-
-						//CHANGED effet rigolo quand le fantome bouge mais consome peut etre
-						//putimage(layer_fx.ctx, "darkness", x * tile_size, y * tile_size, tile_size, tile_size);
+					if (get == false)
 						continue;
-					}
 					if (tab[y][x] == 3) {
 						putimage(layer_items.ctx, "seringe", x * tile_size, y * tile_size, tile_size, tile_size);
 					} else if (tab[y][x] == 1) {
@@ -497,14 +567,6 @@
 					}
 					if (golden && golden.posx != -1)
 						golden.Draw();
-					// layer_fx.ctx.save();
-					// layer_fx.ctx.shadowColor = 'yellow';
-					// layer_fx.ctx.shadowBlur = 30;
-					// layer_fx.ctx.globalCompositeOperation ="destination-in";
-					// putimage(layer_fx.ctx, img, x * tile_size, y * tile_size, tile_size, tile_size);
-					// layer_fx.ctx.restore();
-					//
-					//TODO il y a un glitch quand on se deplace parceque les interval de rafraichissement des animation et cette fonction qui se declenhe sous l'appel du seveur = fonction a detruire a 90%
 				}
 			}
 		}
@@ -526,7 +588,7 @@
 				if (golden)
 					golden.Clear();
 				layer_players.Clear();
-				putimage(layer_players.ctx, "halo", my.x * tile_size - 16, my.y * tile_size - 16, 64, 64);
+				putimage(layer_players.ctx, "halo", my.sprite.posx * tile_size - 16 + my.sprite.movex, my.sprite.posy * tile_size - 16  + my.sprite.movey, 64, 64);
 				layer_items.Draw();
 				layer_players.Draw();
 			}, 50);
@@ -573,6 +635,11 @@
 			socket.emit('move', my.dep);
 		});
 	</script>
+
 </body>
 
+<<<<<<< HEAD
 </html>
+=======
+</html>
+>>>>>>> e48188edd48784853cffc37c0c3680748f58dddc

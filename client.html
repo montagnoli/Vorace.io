@@ -118,7 +118,7 @@
 	</div>
 	<script type="text/javascript">
 		var tile_size = 32;
-
+		var log_players = [];
 		layer_ui = new Layer("game", 'ui', 896, 928, 6);
 		layer_players = new Layer("game", 'players', 896, 896, 4);
 		layer_map = new Layer("game", 'map', 896, 896, 1);
@@ -279,9 +279,17 @@
 
 		socket.on('start', function(list) {
 			for (i = 0; i < list['players'].length; i++) {
-				var user_div = document.createElement('p');
-				user_div.innerHTML = list['players'][i].pseudo;
-				document.getElementById("users").appendChild(user_div);
+				var t = false
+				for (var j = 0; j < log_players.length; j++) {
+					if (log_players[j] == list['players'][j])
+						t = true;
+				}
+				if (t)
+				{
+					var user_div = document.createElement('p');
+					user_div.innerHTML = list['players'][i].pseudo;
+					document.getElementById("users").appendChild(user_div);
+				}
 				if (list['players'][i].id == socket.id) {
 					my = new User(list['players'][i].id, list['players'][i].pseudo, list['players'][i].x, list['players'][i].y, list['players'][i].role);
 					if (my.role == "V") {

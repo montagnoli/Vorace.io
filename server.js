@@ -22,12 +22,14 @@ function Game() {
     this.loop = 0;
     this.timer = 0;
     this.id = Math.floor(Math.random() * (99999999 - 10000000)) + 10000000;
-    this.max_players = 3;
+    this.max_players = 4;
     this.players = [];
     this.golden = 0;
     this.stats = "W"; // W=wait I=in_progress P=private
+    this.update = [];
 
-    this.bcast_pacman = function(type, send) {
+
+    this.bcast_vorace = function(type, send) {
         for (var i = 0; i < this.players.length; i++) {
             var p = this.players[i];
             if (p.role == "V")
@@ -69,45 +71,65 @@ function Game() {
     }
 
     this.check_case_fantome = function(u) {
-        var p = this.get_pacman();
+        var p = this.get_vorace();
         if (p == null) return;
         var it = this.maps['map'][u.y][u.x];
         if (u.x == p.x && u.y == p.y && this.timer != 0) {
             u.eats = true;
+            p.score_kill_as_vorace += 1;
+            this.update.push({"id": p.socket.id.substring(2), "score_kill_as_vorace": p.score_kill_as_vorace})
+            u.score_killed_by_vorace += 1;
+            this.update.push({"id": u.socket.id.substring(2), "score_kill_as_vorace": u.score_killed_by_vorace})
         }
         if (it == 2 && u.eats == true) {
             u.eats = false;
         }
         if (it == 42) {
+            u.score_eated_golden += 1;
+            this.update.push({"id": u.socket.id.substring(2), "score_eated_golden": u.score_eated_golden})
             u.view += 2;
             this.stop_golden();
         }
     };
 
-    this.check_case_pacman = function() {
-        var p = this.get_pacman();
+    this.check_case_vorace = function() {
+        var p = this.get_vorace();
         if (p == null) return;
         var it = this.maps['map'][p.y][p.x];
         if (it == 3) {
             this.timer = 45;
+            p.score_eated_seringe += 1;
+            this.update.push({"id": p.socket.id.substring(2), "score_eated_seringe": p.score_eated_seringe})
             this.maps['map'][p.y][p.x] = 9;
         } else if (it == 1) {
             this.maps['map'][p.y][p.x] = 9;
-            var count = this.count_pacdot();
+            var count = this.count_ember();
+            p.score_eated_ember += 1;
+            this.update.push({"id": p.socket.id.substring(2), "score_eated_ember": p.score_eated_ember})
             this.bcast("ember", count);
             if (count == 0)
-                end_game(this, 'Vorace (' + this.get_pacman().pseudo + ') win !');
+            {
+                p.score_victory_as_vorace += 1;
+                this.update.push({"id": p.socket.id.substring(2), "score_victory_as_vorace": p.score_victory_as_vorace})
+                end_game(this, 'Vorace win !');
+            }
         } else if (it == 2)
+        {
+            p.score_killed_by_void += 1;
+            this.update.push({"id": p.socket.id.substring(2), "score_killed_by_void": p.score_killed_by_void})
             this.remove_life();
+        }
         else if (it == 42) {
             this.life += 2;
             this.timer = 45;
+            p.score_eated_golden += 1;
+            this.update.push({"id": p.socket.id.substring(2), "score_eated_golden": p.score_eated_golden})
             this.bcast("life", this.life);
             this.stop_golden();
         }
     }
 
-    this.count_pacdot = function() {
+    this.count_ember = function() {
         var tab = this.maps['map'];
         var nb = 0;
         for (var y = 0; y < tab.length; y++) {
@@ -126,6 +148,16 @@ function Game() {
             this.stop_golden();
         this.loop = 0;
         if (this.life <= 0) {
+            for (var i = 0; i < this.players.length; i++) {
+                var p = this.players[i];
+                if (p == null)
+                    continue;
+                if (p.role != "V")
+                {
+                    p.score_victory_as_fantom += 1;
+                    this.update.push({"id": p.socket.id.substring(2), "score_victory_as_fantom": p.score_victory_as_fantom})
+                }
+            }
             end_game(this, 'Fantomes win !');
             return;
         }
@@ -143,14 +175,18 @@ function Game() {
         this.send_move();
     }
 
-    this.check_pacman = function() {
-        var p = this.get_pacman();
+    this.check_vorace = function() {
+        var p = this.get_vorace();
         for (var i = 0; i < this.players.length; i++) {
             var u = this.players[i];
             if (u == p) continue;
             if (p == null)
                 return;
             if (p.x == u.x && p.y == u.y && this.timer == 0 && u.eats == false) {
+                u.score_kill_as_fantom += 1;
+                this.update.push({"id": u.socket.id.substring(2), "score_kill_as_fantom": u.score_kill_as_fantom})
+                p.score_killed_by_fantom += 1;
+                this.update.push({"id": p.socket.id.substring(2), "score_killed_by_fantom": p.score_killed_by_fantom})
                 this.remove_life();
                 return true;
             }
@@ -159,7 +195,7 @@ function Game() {
     }
 
     this.get_view = function(mx, my, view) {
-        var p = this.get_pacman();
+        var p = this.get_vorace();
         if (p == null)
             return;
         var tab = this.maps['map'];
@@ -203,7 +239,7 @@ function Game() {
                 });
             }
         }
-        this.bcast_pacman("move", mp);
+        this.bcast_vorace("move", mp);
         this.bcast_fantome("move", mf);
         //this.bcast("move", mp);
     }
@@ -217,14 +253,15 @@ function Game() {
             var p = this.players[i];
             r['players'].push({
                 'id': p.socket.id.substring(2),
-                'pseudo': p.pseudo
+                'pseudo': p.pseudo,
+                'stats': p.get_stats()
             });
         }
         this.bcast("list_player", r);
     }
 
     this.moveall = function(type, send) {
-        var p = this.get_pacman();
+        var p = this.get_vorace();
         for (var i = 0; i < this.players.length; i++) {
             var u = this.players[i];
             if (u == p) continue;
@@ -232,17 +269,17 @@ function Game() {
             u.move(this.maps['map']);
             this.check_case_fantome(u);
         }
-        if (this.check_pacman() == true)
+        if (this.check_vorace() == true)
             return;
         this.send_move();
         p.move(this.maps['map']);
-        if (this.check_pacman() == true)
+        if (this.check_vorace() == true)
             return;
         this.send_move();
-        this.check_case_pacman();
+        this.check_case_vorace();
     }
 
-    this.get_pacman = function() {
+    this.get_vorace = function() {
         for (var i = 0; i < this.players.length; i++) {
             if (this.players[i].role == "V")
                 return this.players[i];
@@ -270,14 +307,31 @@ function User(socket, pseudo) {
     this.pdep = 0;
     this.view = 5;
 
-	this.score_kill_as_fantom = 0;
-	this.score_kill_as_vorace = 0;
-	this.score_kill_by_fantom = 0;
-	this.score_kill_by_vorace = 0;
-	this.score_eated_ember = 0;
-	this.score_eated_seringe = 0;
-	this.score_eated_golden = 0;
+    this.score_kill_as_fantom = 0; //
+    this.score_kill_as_vorace = 0; //
+    this.score_killed_by_fantom = 0; //
+    this.score_killed_by_void = 0; //
+    this.score_killed_by_vorace = 0; //
+    this.score_eated_ember = 0; //
+    this.score_eated_seringe = 0; //
+    this.score_eated_golden = 0; //
+    this.score_victory_as_fantom = 0;
+    this.score_victory_as_vorace = 0;
 
+
+    this.get_stats = function()
+    {
+        return {"score_kill_as_fantom": this.score_kill_as_fantom,
+        "score_kill_as_vorace" : this.score_kill_as_vorace,
+        "score_killed_by_fantom" : this.score_killed_by_fantom,
+        "score_killed_by_void" : this.score_killed_by_void,
+        "score_killed_by_vorace" : this.score_killed_by_vorace,
+        "score_eated_ember" : this.score_eated_ember,
+        "score_eated_seringe" : this.score_eated_seringe,
+        "score_eated_golden" : this.score_eated_golden,
+        "score_victory_as_fantom " :this.score_victory_as_fantom,
+        "score_victory_as_vorace" : this.score_victory_as_vorace}
+    }
 
     this.move = function(tab) {
         //TODO pre-direction 1 case a l'avance seulement
@@ -392,7 +446,7 @@ function move_players() {
             g.bcast("timer", g.timer);
         }
         g.loop += 1;
-        if (g.loop >= 1000 + Math.floor(Math.random() * (1000))) {
+        if (g.loop >= 500 + Math.floor(Math.random() * (500))) {
             g.spawn_golden();
             console.log("GOGOGOGO");
             g.loop = 0;
@@ -401,6 +455,11 @@ function move_players() {
             g.golden--;
             if (g.golden == 0)
                 g.stop_golden();
+        }
+        if (g.update != [])
+        {
+            g.bcast("update_stats", g.update);
+            g.update = [];
         }
     }
 }
@@ -432,6 +491,9 @@ function get_user_by_id(id) {
 }
 
 function end_game(g, raison) {
+    g.send_move();
+    if (g.update != [])
+        g.bcast("update_stats", g.update);
     if (g.stats == "I") {
         g.bcast("end_game", raison);
         fs.appendFile('log.txt', raison + "\n", 'utf8', function(err) {});

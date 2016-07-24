@@ -43,7 +43,7 @@ function Sprite(name, x , y, categorie)
 	}
 		// Chargement de l'image dans l'attribut image
 	this.Draw = function(params)	{
-		console.log(this.name + this.posx + ", " + this.posy);
+		// console.log(this.name + this.posx + ", " + this.posy);
 		if (this.anim_isplay = true)
 		{
 			var height = images[that.name + "_" + that.current_anim].naturalHeight;

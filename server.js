@@ -45,7 +45,6 @@ function Game() {
             'y': this.maps['ps'][0]
         };
         this.bcast("golden", m);
-		console.log(m);
     }
 
     this.stop_golden = function() {
@@ -77,16 +76,16 @@ function Game() {
         if (u.x == p.x && u.y == p.y && this.timer != 0) {
             u.eats = true;
             p.score_kill_as_vorace += 1;
-            this.update.push({"id": p.socket.id.substring(2), "score_kill_as_vorace": p.score_kill_as_vorace})
+            this.update.push({"id": p.socket.id.substring(2), "kill_as_vorace": p.score_kill_as_vorace})
             u.score_killed_by_vorace += 1;
-            this.update.push({"id": u.socket.id.substring(2), "score_kill_as_vorace": u.score_killed_by_vorace})
+            this.update.push({"id": u.socket.id.substring(2), "kill_by_vorace": u.score_killed_by_vorace})
         }
         if (it == 2 && u.eats == true) {
             u.eats = false;
         }
         if (it == 42) {
             u.score_eated_golden += 1;
-            this.update.push({"id": u.socket.id.substring(2), "score_eated_golden": u.score_eated_golden})
+            this.update.push({"id": u.socket.id.substring(2), "eated_golden": u.score_eated_golden})
             u.view += 2;
             this.stop_golden();
         }
@@ -99,31 +98,31 @@ function Game() {
         if (it == 3) {
             this.timer = 45;
             p.score_eated_seringe += 1;
-            this.update.push({"id": p.socket.id.substring(2), "score_eated_seringe": p.score_eated_seringe})
+            this.update.push({"id": p.socket.id.substring(2), "eated_seringe": p.score_eated_seringe})
             this.maps['map'][p.y][p.x] = 9;
         } else if (it == 1) {
             this.maps['map'][p.y][p.x] = 9;
             var count = this.count_ember();
             p.score_eated_ember += 1;
-            this.update.push({"id": p.socket.id.substring(2), "score_eated_ember": p.score_eated_ember})
+            this.update.push({"id": p.socket.id.substring(2), "eated_ember": p.score_eated_ember})
             this.bcast("ember", count);
             if (count == 0)
             {
                 p.score_victory_as_vorace += 1;
-                this.update.push({"id": p.socket.id.substring(2), "score_victory_as_vorace": p.score_victory_as_vorace})
+                this.update.push({"id": p.socket.id.substring(2), "victory_as_vorace": p.score_victory_as_vorace})
                 end_game(this, 'Vorace win !');
             }
         } else if (it == 2)
         {
             p.score_killed_by_void += 1;
-            this.update.push({"id": p.socket.id.substring(2), "score_killed_by_void": p.score_killed_by_void})
+            this.update.push({"id": p.socket.id.substring(2), "killed_by_void": p.score_killed_by_void})
             this.remove_life();
         }
         else if (it == 42) {
             this.life += 2;
             this.timer = 45;
             p.score_eated_golden += 1;
-            this.update.push({"id": p.socket.id.substring(2), "score_eated_golden": p.score_eated_golden})
+            this.update.push({"id": p.socket.id.substring(2), "eated_golden": p.score_eated_golden})
             this.bcast("life", this.life);
             this.stop_golden();
         }
@@ -155,7 +154,7 @@ function Game() {
                 if (p.role != "V")
                 {
                     p.score_victory_as_fantom += 1;
-                    this.update.push({"id": p.socket.id.substring(2), "score_victory_as_fantom": p.score_victory_as_fantom})
+                    this.update.push({"id": p.socket.id.substring(2), "victory_as_fantom": p.score_victory_as_fantom})
                 }
             }
             end_game(this, 'Fantomes win !');
@@ -184,9 +183,9 @@ function Game() {
                 return;
             if (p.x == u.x && p.y == u.y && this.timer == 0 && u.eats == false) {
                 u.score_kill_as_fantom += 1;
-                this.update.push({"id": u.socket.id.substring(2), "score_kill_as_fantom": u.score_kill_as_fantom})
+                this.update.push({"id": u.socket.id.substring(2), "kill_as_fantom": u.score_kill_as_fantom})
                 p.score_killed_by_fantom += 1;
-                this.update.push({"id": p.socket.id.substring(2), "score_killed_by_fantom": p.score_killed_by_fantom})
+                this.update.push({"id": p.socket.id.substring(2), "killed_by_fantom": p.score_killed_by_fantom})
                 this.remove_life();
                 return true;
             }
@@ -318,19 +317,18 @@ function User(socket, pseudo) {
     this.score_victory_as_fantom = 0;
     this.score_victory_as_vorace = 0;
 
-
     this.get_stats = function()
     {
-        return {"score_kill_as_fantom": this.score_kill_as_fantom,
-        "score_kill_as_vorace" : this.score_kill_as_vorace,
-        "score_killed_by_fantom" : this.score_killed_by_fantom,
-        "score_killed_by_void" : this.score_killed_by_void,
-        "score_killed_by_vorace" : this.score_killed_by_vorace,
-        "score_eated_ember" : this.score_eated_ember,
-        "score_eated_seringe" : this.score_eated_seringe,
-        "score_eated_golden" : this.score_eated_golden,
-        "score_victory_as_fantom " :this.score_victory_as_fantom,
-        "score_victory_as_vorace" : this.score_victory_as_vorace}
+        return {"kill_as_fantom": this.score_kill_as_fantom,
+        "kill_as_vorace" : this.score_kill_as_vorace,
+        "killed_by_fantom" : this.score_killed_by_fantom,
+        "killed_by_void" : this.score_killed_by_void,
+        "killed_by_vorace" : this.score_killed_by_vorace,
+        "eated_ember" : this.score_eated_ember,
+        "eated_seringe" : this.score_eated_seringe,
+        "eated_golden" : this.score_eated_golden,
+        "victory_as_fantom " :this.score_victory_as_fantom,
+        "victory_as_vorace" : this.score_victory_as_vorace}
     }
 
     this.move = function(tab) {

@@ -27,11 +27,19 @@
 			border: 1px solid black;
 		}
 
-		#users p {
+		#users div {
 			color: #ffed00;
 			text-shadow: 0px 0px 20px #ffed00;
 			box-shadow: 0px 0px 20px #ffed00;
-			font-size: 20px;
+			margin:10px ;
+			font-size: 15px;
+		}
+		#users p {
+			color: #ffed00;
+			text-shadow: 0px 0px 20px #ffed00;
+			margin:0 ;
+			/*box-shadow: 0px 0px 20px #ffed00;*/
+			font-size: 15px;
 		}
 
 		#game {
@@ -284,6 +292,12 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 		socket.emit('play', true);
 		socket.on('list_player', function(list) {
 			clear_game();
+			document.getElementById("users").innerHTML = "";
+			for (p of list.players)	{
+					ui_add_user(p);
+
+			}
+		//	ui_add_user(list['players'][i]);
 			layer_ui.ctx.shadowColor = "yellow";
 			layer_ui.ctx.shadowBlur = 10;
 			layer_ui.ctx.fillStyle = "black";
@@ -292,7 +306,10 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			layer_ui.ctx.fillText("Waiting " + (list['required'] - list['players'].length) + " players...", 448, 224);
 			layer_ui.ctx.shadowBlur = 0;
 		});
-
+		socket.on('update_stats', function (update) {
+			console.log(update);
+						ui_update_stat(update);
+		});
 
 		socket.on('timer', function(t) {
 			timer = t;
@@ -329,48 +346,42 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 					}
 				}
 			}
+
 			refresh_game();
 		});
 		function ui_update_stat(update) {
-			for (var id in update)
-				for (var stat in update[id]) {
-						var to_update = document.getElementById(id).getElementsByClassName(stat)
-						to_update.innerHTML = update[id][stat];
-				}
+			for (var player of update){
+				console.log(player)
+				for (var stat in player) {
+					console.log(stat)
+					if (stat == 'id')
+						continue;
+					console.log(player.id)
+
+						var to_update = document.getElementById(player.id).getElementsByClassName(stat)[0]
+						console.log(to_update);
+						to_update.innerHTML = stat + " " +player[stat];
+						console.log(to_update);
+				}}
 		}
 
-		// function ui_add_user(user) {
-		// 	var user_name = document.createElement('p');
-		// 	user_name.setAttribute("id", user.);
-		// 	user_name.innerHTML = user.pseudo;
-		// 	document.getElementById("users").appendChild(user_name);
-		// 	var keys = user.stats.keys();
-		// 	for (stat in keys) {
-		// 		var user_stat = document.createElement('p');
-		// 		user_stat.setAttribute("class", stat);
-		// 		user_stat.innnerHTML();
-		// 		user_name.appendChild(user_stat);
-		// 	}
-		// }
+		function ui_add_user(user) {
+			var user_name = document.createElement('div');
+			user_name.setAttribute("id", user.id);
+			user_name.innerHTML = user.pseudo + "\n";
+			document.getElementById("users").appendChild(user_name);
+			for (i in user.stats) {
+				console.log(i);
+		 		var user_stat = document.createElement('p');
+			 	user_stat.setAttribute("class", i);
+			 	user_stat.innerHTML = "[" + i + " " + user.stats[i] + "]";
+			 	user_name.appendChild(user_stat);
+			}
+		}
 
 		socket.on('start', function(list) {
 			for (i = 0; i < list['players'].length; i++) {
-<<<<<<< HEAD
-				var t = false
-				for (var j = 0; j < log_players.length; j++) {
-					if (log_players[j] == list['players'][j])
-						t = true;
-				}
-				if (t)
-				{
-					var user_div = document.createElement('p');
-					user_div.innerHTML = list['players'][i].pseudo;
-					document.getElementById("users").appendChild(user_div);
-				}
-=======
-				//ui_add_user(list['players'][i]);
->>>>>>> e48188edd48784853cffc37c0c3680748f58dddc
-				if (list['players'][i].id == socket.id) {
+					if (list['players'][i].id == socket.id) {
 					my = new User(list['players'][i].id, list['players'][i].pseudo, list['players'][i].x, list['players'][i].y, list['players'][i].role);
 					if (my.role == "V") {
 						my.sprite = new Sprite("vorace");
@@ -508,7 +519,7 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			var tab = map.field;
 				// my.sprite.posx = my.x;
 				// my.sprite.posy = my.y;
-						console.log(my)
+			//			console.log(my)
 			//if ((my.x != my.sprite.posx || my.y != my.sprite.posy))
 					my.sprite.Move(my.x * tile_size, my.y * tile_size, 100);
 			set_anim_dep(my.dep.toString(), my.sprite, my);
@@ -638,8 +649,4 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 
 </body>
 
-<<<<<<< HEAD
 </html>
-=======
-</html>
->>>>>>> e48188edd48784853cffc37c0c3680748f58dddc

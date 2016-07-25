@@ -15,6 +15,7 @@ function Sprite(name, x , y, categorie)
 	this.anim_index = 0;
 	this.cat = categorie;
 	this.interval_id;
+	this.visible = 1;
 	this.anim_isplay = true;
 	this.SetPos = function(x, y)	{
 		this.posx = x;
@@ -43,6 +44,8 @@ function Sprite(name, x , y, categorie)
 	}
 		// Chargement de l'image dans l'attribut image
 	this.Draw = function(params)	{
+		if (this.visible == 0)
+			return;
 		// console.log(this.name + this.posx + ", " + this.posy);
 		if (this.anim_isplay = true)
 		{

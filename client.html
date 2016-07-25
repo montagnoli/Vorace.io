@@ -199,6 +199,8 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			this.role = role;
 			this.x = x;
 			this.y = y;
+			this.prevx = 0;
+			this.prevy = 0;
 			this.dep = 0;
 			this.eats = false;
 			this.view = 3;
@@ -319,8 +321,7 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			var v = get_vorace();
 			if (v == null)
 				return;
-			v.x = -1;
-			v.y = -1;
+			v.sprite.visible = 0;
 			for (var i = 0; i < list.length; i++) {
 				l = list[i];
 				e = get_user_by_id(l['id'])
@@ -332,6 +333,7 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 					e.view = l['view-length'];
 				}
 				if (my.role == "V") {
+					v.sprite.visible = 1;
 					if (e == my && (tab[e.y][e.x] == 1 || tab[e.y][e.x] == 3))
 						tab[e.y][e.x] = 9;
 				} else {
@@ -342,6 +344,7 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 							v.x = c["x"];
 							v.y = c["y"];
 							v.dep = c["dep"];
+							v.sprite.visible = 1;
 						}
 					}
 				}
@@ -493,7 +496,6 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			} else {
 				layer_ui.ctx.clearRect(0, 896, layer_ui.w, layer_ui.height);
 				var i = layer_items.objects.indexOf(golden);
-				golden.Anim_stop();
 				golden.posx = -1;
 				golden.posy = -1;
 				layer_items.objects.splice(i, 1);
@@ -521,6 +523,11 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 				// my.sprite.posy = my.y;
 			//			console.log(my)
 			//if ((my.x != my.sprite.posx || my.y != my.sprite.posy))
+			if (((my.x != my.sprite.posx + 1) && (my.x != my.sprite.posx - 1) && (my.x != my.sprite.posx)) ||
+		(my.y != my.sprite.posy + 1) && (my.y != my.sprite.posy - 1) && (my.y != my.sprite.posy))	{
+			 my.sprite.posx = my.x;
+			 my.sprite.posy = my.y;
+		 }
 					my.sprite.Move(my.x * tile_size, my.y * tile_size, 100);
 			set_anim_dep(my.dep.toString(), my.sprite, my);
 			layer_items.Clear();
@@ -529,10 +536,13 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			layer_fx.Clear();
 			for (i = 0; i < enemy.length; i++) {
 				e = enemy[i];
-		//		console.log(e);
-				// e.sprite.posx = e.x;
-				// e.sprite.posy = e.y;
-				e.sprite.Move(e.x * tile_size, e.y * tile_size, 100);
+				if (((e.x != e.sprite.posx + 1) && (e.x != e.sprite.posx - 1) && (e.x != e.sprite.posx)) ||
+			(e.y != e.sprite.posy + 1) && (e.y != e.sprite.posy - 1) && (e.y != e.sprite.posy))	{
+				 e.sprite.posx = e.x;
+				 e.sprite.posy = e.y;
+			 	}
+			 	else
+					e.sprite.Move(e.x * tile_size, e.y * tile_size, 100);
 				set_anim_dep(e.dep.toString(), e.sprite, e);
 			}
 			//		lumiere pour les fantomes;
@@ -555,7 +565,6 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 
 					var get = false;
 					if (my.role == 'F') {
-
 						for (i = 0; i < enemy.length; i++) {
 							e = enemy[i];
 							if (e.role == 'V') continue;

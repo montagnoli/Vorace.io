@@ -22,7 +22,8 @@ function Game() {
     this.loop = 0;
     this.timer = 0;
     this.id = Math.floor(Math.random() * (99999999 - 10000000)) + 10000000;
-    this.max_players = 4;
+    this.max_players = 2;
+    this.wait = -1;
     this.players = [];
     this.golden = 0;
     this.stats = "W"; // W=wait I=in_progress P=private
@@ -39,7 +40,7 @@ function Game() {
 
     this.spawn_golden = function() {
         this.maps['map'][this.maps['ps'][0]][this.maps['ps'][1]] = 42;
-        this.golden = 30;
+        this.golden = 60;
 		var m = {
             'x': this.maps['ps'][1],
             'y': this.maps['ps'][0]
@@ -73,12 +74,12 @@ function Game() {
         var p = this.get_vorace();
         if (p == null) return;
         var it = this.maps['map'][u.y][u.x];
-        if (u.x == p.x && u.y == p.y && this.timer != 0) {
+        if (u.x == p.x && u.y == p.y && this.timer != 0 && u.eats == false) {
             u.eats = true;
             p.score_kill_as_vorace += 1;
             this.update.push({"id": p.socket.id.substring(2), "kill_as_vorace": p.score_kill_as_vorace})
             u.score_killed_by_vorace += 1;
-            this.update.push({"id": u.socket.id.substring(2), "kill_by_vorace": u.score_killed_by_vorace})
+            this.update.push({"id": u.socket.id.substring(2), "killed_by_vorace": u.score_killed_by_vorace})
         }
         if (it == 2 && u.eats == true) {
             u.eats = false;
@@ -146,6 +147,9 @@ function Game() {
         if (this.golden != 0)
             this.stop_golden();
         this.loop = 0;
+        this.timer = 0;
+        this.bcast("timer", 0);
+        this.send_move();
         if (this.life <= 0) {
             for (var i = 0; i < this.players.length; i++) {
                 var p = this.players[i];
@@ -160,18 +164,8 @@ function Game() {
             end_game(this, 'Fantomes win !');
             return;
         }
-        var u = this.players;
-        for (var i = 0; i < u.length; i++) {
-            u[i].dep = 0;
-            if (u[i].role == "V") {
-                u[i].y = this.maps['ps'][0];
-                u[i].x = this.maps['ps'][1];
-            } else {
-                u[i].y = this.maps['fs'][0];
-                u[i].x = this.maps['fs'][1];
-            }
-        }
-        this.send_move();
+        else
+            this.wait = 20;
     }
 
     this.check_vorace = function() {
@@ -396,7 +390,6 @@ function run_game(g) {
             u[i].x = g.maps['fs'][1];
             u[i].role = "F";
         }
-		console.log(g);
         players.push({
             'id': u[i].socket.id.substring(2),
             'pseudo': u[i].pseudo,
@@ -438,6 +431,26 @@ function move_players() {
         var g = games[i];
         if (g.stats == "W" || g.stats == "P")
             continue;
+        if (g.wait >= 0)
+        {
+            g.wait--;
+            if (g.wait == -1)
+            {
+                var u = g.players;
+                for (var i = 0; i < u.length; i++) {
+                    u[i].dep = 0;
+                    if (u[i].role == "V") {
+                        u[i].y = g.maps['ps'][0];
+                        u[i].x = g.maps['ps'][1];
+                    } else {
+                        u[i].y = g.maps['fs'][0];
+                        u[i].x = g.maps['fs'][1];
+                    }
+                }
+                g.send_move();
+            }
+            continue;
+        }
         g.moveall();
         if (g.timer != 0) {
             g.timer--;

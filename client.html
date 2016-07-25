@@ -3,6 +3,10 @@
 
 <head>
 	<style>
+		.my_stats {
+			color: white !important;
+			text-shadow: 0px 0px 20px #ffffee !important;
+		}
 			#users {
 				order: 3;
 				width: 10vw;
@@ -10,6 +14,7 @@
 				box-shadow: 0px 0px 20px #ffed00;
 				text-shadow: 0px 0px 20px #ffed00;
 			}
+
 	@media screen {
 		html, body {
 			background-color: black;
@@ -31,15 +36,14 @@
 			color: #ffed00;
 			text-shadow: 0px 0px 20px #ffed00;
 			box-shadow: 0px 0px 20px #ffed00;
-			margin:10px ;
-			font-size: 15px;
+			font-size: 1vmin;
 		}
 		#users p {
 			color: #ffed00;
 			text-shadow: 0px 0px 20px #ffed00;
 			margin:0 ;
 			/*box-shadow: 0px 0px 20px #ffed00;*/
-			font-size: 15px;
+			font-size: 1vmin;
 		}
 
 		#game {
@@ -296,8 +300,12 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			clear_game();
 			document.getElementById("users").innerHTML = "";
 			for (p of list.players)	{
-					ui_add_user(p);
-
+				if (p.id == socket.id)
+					ui_add_user(p, true);
+			}
+			for (p of list.players)	{
+				if (p.id != socket.id)
+					ui_add_user(p, false);
 			}
 		//	ui_add_user(list['players'][i]);
 			layer_ui.ctx.shadowColor = "yellow";
@@ -309,7 +317,7 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			layer_ui.ctx.shadowBlur = 0;
 		});
 		socket.on('update_stats', function (update) {
-			console.log(update);
+		//	console.log(update);
 						ui_update_stat(update);
 		});
 
@@ -354,27 +362,23 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 		});
 		function ui_update_stat(update) {
 			for (var player of update){
-				console.log(player)
 				for (var stat in player) {
-					console.log(stat)
 					if (stat == 'id')
 						continue;
-					console.log(player.id)
-
+						//console.log(stat);
 						var to_update = document.getElementById(player.id).getElementsByClassName(stat)[0]
-						console.log(to_update);
 						to_update.innerHTML = stat + " " +player[stat];
-						console.log(to_update);
 				}}
 		}
 
-		function ui_add_user(user) {
+		function ui_add_user(user, my) {
 			var user_name = document.createElement('div');
+			if (my == true)
+				user_name.setAttribute("class", "my_stats")
 			user_name.setAttribute("id", user.id);
 			user_name.innerHTML = "<h1>" + user.pseudo + "\n" + "</h1>";
 			document.getElementById("users").appendChild(user_name);
 			for (i in user.stats) {
-				console.log(i);
 		 		var user_stat = document.createElement('p');
 			 	user_stat.setAttribute("class", i);
 			 	user_stat.innerHTML = i + " " + user.stats[i];
@@ -418,17 +422,6 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 		});
 
 		socket.on('end_game', function(msg) {
-			my.sprite.Anim_stop();
-			for (e of enemy)
-			{
-				e.sprite.Anim_stop();
-			}
-			layer_players.objects = [];
-			my = null;
-			ingame = false;
-			enemy = [];
-			move = 0;
-			timer = 0;
 			//UI
 			layer_ui.ctx.shadowColor = "yellow";
 			layer_ui.ctx.shadowBlur = 10;
@@ -438,7 +431,21 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			layer_ui.ctx.font = "30px Arial";
 			layer_ui.ctx.fillText("Press Enter for replay !", 448, 672);
 			layer_ui.ctx.shadowBlur = 10;
-			clearInterval(game_interval_id);
+
+			setTimeout(function(){
+				my.sprite.Anim_stop();
+				for (e of enemy)
+				{
+					e.sprite.Anim_stop();
+				}
+				layer_players.objects = [];
+				my = null;
+				ingame = false;
+				enemy = [];
+				move = 0;
+				timer = 0;
+				clearInterval(game_interval_id);
+			}, 1000);
 		});
 		//TODO trouver des images
 		socket.on('life', function(life) {
@@ -481,10 +488,13 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 		}
 
 		function clear_game() {
-			layer_players.ctx.clearRect(0, 0, layer_players.canvas.width, layer_players.canvas.height);
+			layer_fx.ctx.clearRect(0, 0, layer_fx.canvas.width, layer_fx.canvas.height);
+			layer_map.ctx.clearRect(0, 0, layer_map.canvas.width, layer_map.canvas.height);
+			layer_items.ctx.clearRect(0, 0, layer_items.canvas.width, layer_items.canvas.height);
 			layer_ui.ctx.clearRect(0, 0, layer_ui.canvas.width, layer_ui.canvas.height);
 			layer_players.ctx.clearRect(0, 0, layer_players.canvas.width, layer_players.canvas.height);
 		}
+
 		var golden;
 		socket.on('golden', function(s) {
 			if (s !== false) {

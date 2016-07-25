@@ -22,7 +22,7 @@ function Game() {
     this.loop = 0;
     this.timer = 0;
     this.id = Math.floor(Math.random() * (99999999 - 10000000)) + 10000000;
-    this.max_players = 2;
+    this.max_players = 4;
     this.wait = -1;
     this.players = [];
     this.golden = 0;

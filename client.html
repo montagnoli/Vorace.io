@@ -371,13 +371,13 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 		function ui_add_user(user) {
 			var user_name = document.createElement('div');
 			user_name.setAttribute("id", user.id);
-			user_name.innerHTML = user.pseudo + "\n";
+			user_name.innerHTML = "<h1>" + user.pseudo + "\n" + "</h1>";
 			document.getElementById("users").appendChild(user_name);
 			for (i in user.stats) {
 				console.log(i);
 		 		var user_stat = document.createElement('p');
 			 	user_stat.setAttribute("class", i);
-			 	user_stat.innerHTML = "[" + i + " " + user.stats[i] + "]";
+			 	user_stat.innerHTML = i + " " + user.stats[i];
 			 	user_name.appendChild(user_stat);
 			}
 		}

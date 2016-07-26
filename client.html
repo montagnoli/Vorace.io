@@ -268,6 +268,7 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			["vorace_nice_up", "/img/vorace/nice_up.png"],
 			["vorace_bad_up", "/img/vorace/bad_up.png"],
 			["vorace_bad_left", "/img/vorace/bad_left.png"],
+			["vorace_death", "/img/vorace/death.png"],
 			["golden_shine", "/img/golden/shine.png"]
 		]);
 
@@ -329,9 +330,16 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			var v = get_vorace();
 			if (v == null)
 				return;
-			v.sprite.visible = 0;
+		//	console.log(v.sprite);
+			if (v.sprite.current_anim == "death") {
+				v.sprite.current_anim = "nice_down";
+				v.sprite.anim_speed = 50;
+				v.sprite.anim_loop = 1;
+			}
+
 			for (var i = 0; i < list.length; i++) {
 				l = list[i];
+				var vorace_is_in_view = 0;
 				e = get_user_by_id(l['id'])
 				e.x = l['x'];
 				e.y = l['y'];
@@ -341,7 +349,7 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 					e.view = l['view-length'];
 				}
 				if (my.role == "V") {
-					v.sprite.visible = 1;
+					vorace_is_in_view = 1;
 					if (e == my && (tab[e.y][e.x] == 1 || tab[e.y][e.x] == 3))
 						tab[e.y][e.x] = 9;
 				} else {
@@ -349,12 +357,19 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 						var c = l['view'][j];
 						tab[c["y"]][c["x"]] = c['val'];
 						if (c['vorace'] == true) {
+							vorace_is_in_view = 1;
 							v.x = c["x"];
 							v.y = c["y"];
+							if (v.sprite.visible == 0) {
+								v.sprite.posx = c["x"];
+								v.sprite.posy = c["y"];
+						}
 							v.dep = c["dep"];
 							v.sprite.visible = 1;
 						}
 					}
+					if (!vorace_is_in_view)
+						v.sprite.visible = 0;
 				}
 			}
 
@@ -412,6 +427,7 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 					enemy[0].sprite.posx = enemy[0].x;
 					enemy[0].sprite.posy = enemy[0].y;
 					layer_players.AddObjet(enemy[0].sprite);
+					enemy[0].sprite
 				}
 			}
 			map = new Map();
@@ -448,7 +464,23 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			}, 1000);
 		});
 		//TODO trouver des images
+		var oldlife = 3;
 		socket.on('life', function(life) {
+			if (oldlife > life)	{
+				var v = get_vorace()
+			//	console.log(life + " old :" + oldlife);
+				var dead_interval = setInterval(function() {
+				v.sprite.anim_loop = 0;
+				v.sprite.current_anim = "death";
+				}, 50);
+				setTimeout(function(){
+					clearInterval(dead_interval);
+				}, 150);
+				v.sprite.anim_index = 0;
+				v.sprite.anim_loop = 0;
+				v.sprite.anim_speed = 200;
+			}
+			oldlife = life;
 			layer_ui.ctx.strokeStyle = "white";
 			layer_ui.ctx.clearRect(400, layer_ui.height - 32, 100, layer_ui.height);
 			layer_ui.ctx.font = "30px Arial";
@@ -621,6 +653,7 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 				putimage(layer_players.ctx, "halo", my.sprite.posx * tile_size - 16 + my.sprite.movex, my.sprite.posy * tile_size - 16  + my.sprite.movey, 64, 64);
 				layer_items.Draw();
 				layer_players.Draw();
+				get_vorace().sprite.Draw()
 			}, 50);
 		}
 
@@ -634,8 +667,11 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 				4: "down"
 			};
 			//	console.log(dep);
+
 			if (sprite.name == "vorace")
-				if (timer == 0)
+				if (sprite.current_anim == "death")
+					return;
+				else if (timer == 0)
 					sprite.current_anim = "nice_" + dep_tab[dep];
 				else
 					sprite.current_anim = "bad_" + dep_tab[dep];
@@ -646,6 +682,7 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 				sprite.current_anim = "bad_" + dep_tab[dep];
 			else
 				sprite.current_anim = "nice_" + dep_tab[dep];
+		//	sprite.anim_loop = 1;
 		}
 		document.addEventListener('keydown', function(event) {
 			if (!ingame) {

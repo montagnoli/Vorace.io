@@ -12,9 +12,9 @@ function Sprite(name, x , y, categorie)
 	this.current_anim = "bad_down";
 	this.anim_speed = 50;
 	this.anim_frame;
+	this.anim_loop = 1;
 	this.anim_index = 0;
 	this.cat = categorie;
-	this.interval_id;
 	this.visible = 1;
 	this.anim_isplay = true;
 	this.SetPos = function(x, y)	{
@@ -22,24 +22,49 @@ function Sprite(name, x , y, categorie)
 		this.posy = y;
 	}
 	var that = this; //Je suis amoureux de ce truc. (this n'est pas visible depuis les callback )
+	// this.Anim_start = function()
+	// {
+	// 	that.anim_isplay = true;
+	// 	that.interval_id = setInterval(function () {
+	//
+	// 		var width = images[that.name + "_" + that.current_anim].naturalWidth;
+	// 		var height = images[that.name + "_" + that.current_anim].naturalHeight;
+	// 		var nb_frame = width / height;
+	// 		if (that.anim_index >= nb_frame - 1 && that.anim_loop == 1)
+	// 			that.anim_index = 0;
+	// 		else if (that.anim_loop == 0)
+	// 			;
+	// 		else
+	// 			that.anim_index++;
+	// 		//console.log(this.anim_index);
+	// 	}, that.anim_speed);
+	// }
+
+	this.Anime_play = function() {
+		if (that.anim_loop == 0);
+			//console.log(that.anime_index);
+		var width = images[that.name + "_" + that.current_anim].naturalWidth;
+		var height = images[that.name + "_" + that.current_anim].naturalHeight;
+		var nb_frame = width / height;
+		if (that.anim_index >= nb_frame - 1 && that.anim_loop == 1)
+			that.anim_index = 0;
+		else if (that.anim_index >= nb_frame && that.anim_loop == 0)
+			;
+		else
+			that.anim_index++;
+		if (that.anim_isplay == true);
+	  setTimeout(that.Anime_play, that.anim_speed);
+	}
+
 	this.Anim_start = function()
 	{
-		that.anim_isplay == true;
-		that.interval_id = setInterval(function () {
-
-			var width = images[that.name + "_" + that.current_anim].naturalWidth;
-			var height = images[that.name + "_" + that.current_anim].naturalHeight;
-			var nb_frame = width / height;
-			if (that.anim_index >= nb_frame - 1)
-				that.anim_index = -1;
-	//		that.anim_frame = images[that.name + "_" + that.current_anim];
-			that.anim_index++;
-			//console.log(this.anim_index);
-		}, that.anim_speed);
+		this.anim_isplay = true;
+		this.Anime_play();
 	}
+
+
 	this.Anim_stop = function()
 	{
-		clearInterval(this.interval_id);
 		this.anim_isplay = false;
 	}
 		// Chargement de l'image dans l'attribut image

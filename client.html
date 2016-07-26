@@ -7,6 +7,7 @@
 			color: white !important;
 			text-shadow: 0px 0px 20px #ffffee !important;
 		}
+
 			#users {
 				order: 3;
 				width: 10vw;
@@ -32,15 +33,15 @@
 			border: 1px solid black;
 		}
 
-		#users div {
+		#users > div {
 			color: #ffed00;
 			text-shadow: 0px 0px 20px #ffed00;
 			box-shadow: 0px 0px 20px #ffed00;
 			font-size: 1vmin;
 		}
 		#users p {
-			color: #ffed00;
-			text-shadow: 0px 0px 20px #ffed00;
+			/*color: #ffed00;
+			text-shadow: 0px 0px 20px #ffed00;*/
 			margin:0 ;
 			/*box-shadow: 0px 0px 20px #ffed00;*/
 			font-size: 1vmin;
@@ -107,6 +108,13 @@
 					top: 0px;
 					display: block;
 				}
+	}
+	#users p {
+		display: inline-block;
+    margin: 0px 0px 0px 10px;
+	}
+	#users img {
+		width: 5vmin;
 	}
 
 	</style>
@@ -336,10 +344,11 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 				v.sprite.anim_speed = 50;
 				v.sprite.anim_loop = 1;
 			}
-
+					console.log(list);
+									var vorace_is_in_view = 0;
 			for (var i = 0; i < list.length; i++) {
 				l = list[i];
-				var vorace_is_in_view = 0;
+
 				e = get_user_by_id(l['id'])
 				e.x = l['x'];
 				e.y = l['y'];
@@ -356,6 +365,7 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 					for (var j = 0; j < l['view'].length; j++) {
 						var c = l['view'][j];
 						tab[c["y"]][c["x"]] = c['val'];
+
 						if (c['vorace'] == true) {
 							vorace_is_in_view = 1;
 							v.x = c["x"];
@@ -394,10 +404,16 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			user_name.innerHTML = "<h1>" + user.pseudo + "\n" + "</h1>";
 			document.getElementById("users").appendChild(user_name);
 			for (i in user.stats) {
+				var user_div = document.createElement('div');
 		 		var user_stat = document.createElement('p');
 			 	user_stat.setAttribute("class", i);
-			 	user_stat.innerHTML = i + " " + user.stats[i];
-			 	user_name.appendChild(user_stat);
+				var stat_img = document.createElement('img');
+				stat_img.setAttribute("src", "img/ui/" + i + ".png");
+				stat_img.setAttribute("title", i);
+			 	user_stat.innerHTML = user.stats[i];
+				user_div.appendChild(stat_img);
+			 	user_div.appendChild(user_stat);
+				user_name.appendChild(user_div);
 			}
 		}
 
@@ -666,8 +682,6 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 				3: "right",
 				4: "down"
 			};
-			//	console.log(dep);
-
 			if (sprite.name == "vorace")
 				if (sprite.current_anim == "death")
 					return;
@@ -682,7 +696,6 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 				sprite.current_anim = "bad_" + dep_tab[dep];
 			else
 				sprite.current_anim = "nice_" + dep_tab[dep];
-		//	sprite.anim_loop = 1;
 		}
 		document.addEventListener('keydown', function(event) {
 			if (!ingame) {

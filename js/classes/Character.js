@@ -17,6 +17,8 @@ function Sprite(name, x , y, categorie)
 	this.cat = categorie;
 	this.visible = 1;
 	this.anim_isplay = true;
+	this.modx = 0;
+	this.mody = 0;
 	this.SetPos = function(x, y)	{
 		this.posx = x;
 		this.posy = y;
@@ -82,7 +84,7 @@ function Sprite(name, x , y, categorie)
 				images[this.name + "_" + this.current_anim],
 				this.anim_index * height, 0,
 				height, height,
-				this.posx * tile_size - centering + this.movex , this.posy * tile_size - centering  + this.movey,
+				this.posx * tile_size - centering + this.movex + this.modx , this.posy * tile_size - centering  + this.movey + this.mody,
 				height, height);
 		}
 		else

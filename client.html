@@ -3,122 +3,165 @@
 
 <head>
 	<style>
+		body {
+			overflow: hidden;
+		}
+		@keyframes gling {
+  		0%   {box-shadow: 0px 0px 40px #ffffee;}
+  		100% {box-shadow: none }
+		}
+		
 		.my_stats {
 			color: white !important;
 			text-shadow: 0px 0px 20px #ffffee !important;
 		}
-
-			#users {
-				order: 3;
-				width: 10vw;
-				display: inline-block;
-				box-shadow: 0px 0px 20px #ffed00;
-				text-shadow: 0px 0px 20px #ffed00;
-			}
-
-	@media screen {
-		html, body {
-			background-color: black;
-			height: 100vw;
-			margin: 0;
-		}
-
-		#contener {
-			position: relative;
-			/*width: 100vw;*/
-			min-height: 99vw;
+		
+		#users {
+			max-height: 100vh;
+			min-width: 20%;
+			order: 3;
 			display: flex;
-			flex-direction: row;
+			flex-direction: column;
 			justify-content: space-around;
-			border: 1px solid black;
+			flex-wrap: wrap;
+			align-items: center;
+			text-shadow: 0px 0px 20px #ffed00;
 		}
-
-		#users > div {
+		
+		#users h1 {
+			margin: 1vmin;
+			display: block !important;
+		}
+		
+		#users p {
+			display: inline-block;
+			margin: 0px 0px 0px 10px;
+		}
+		
+		#users img {
+			width: 3vmin;
+		}
+		#users > div > div
+		{
+			animation-name: gling;
+   			animation-duration: 1s;
+		}
+			#users> div {
+			
+			z-index: 1;
+			flex-shrink: 0;
+			display: flex;
+			flex-direction: column;
+			flex-wrap: wrap;
+			padding: 1vmin;
+			margin-left: 2vmin;
+			margin-right: 2vmin;
 			color: #ffed00;
+			max-height: 45vmin;
+			background-color: black;
 			text-shadow: 0px 0px 20px #ffed00;
 			box-shadow: 0px 0px 20px #ffed00;
 			font-size: 1vmin;
 		}
+		
 		#users p {
-			/*color: #ffed00;
-			text-shadow: 0px 0px 20px #ffed00;*/
-			margin:0 ;
-			/*box-shadow: 0px 0px 20px #ffed00;*/
-			font-size: 1vmin;
-		}
-
-		#game {
-			order: 2;
-			position: relative;
-			width: 95vw;
-			max-height: 1000px;
-			/*https://css-tricks.com/snippets/css/a-guide-to-flexbox/*/
 			flex: 0 1 auto;
-			border: 1px solid black;
-			box-shadow: 0px 0px 200px #ffed00;
+			margin: 0;
+			font-size: 2vmin;
 		}
-
-		#game canvas {
-			width: 100%;
-			image-rendering: optimizeSpeed;
-			image-rendering: -moz-crisp-edges;
-			image-rendering: -webkit-optimize-contrast;
-			image-rendering: optimize-contrast;
-			image-rendering: crisp-edges;
-			position: absolute;
-			left: 0px;
-			top: 0px;
-			display: block;
+		
+		@media screen and (min-aspect-ratio:900/600) {
+			#users> div {
+				font-size: 2vmin;
+			}
+			#users p {
+				margin: 0;
+				font-size: 3vmin;
+				padding: 0px;
+			}
+			#users img {
+				width: 3vmin;
+			}
 		}
-	}
-	@media screen and (min-aspect-ratio:50/50){
-				html, body {
-					background-color: black;
-					height: 100vh;
-		    		margin: 0;
-				}
-
-				#contener {
-					position: relative;
-					min-height: 99vh;
-					display: flex;
-					flex-direction: row;
-					justify-content: space-around;;
-					border: 1px solid black;
-				}
-
-				#game {
-					position: relative;
-					width: 95vh;
-					max-height: 100vh;
-					flex: 0 1 auto;
-					border: 1px solid black;
-					box-shadow: 0px 0px 200px #ffed00;
-				}
-
-				#game canvas {
-					width: 100%;
-					image-rendering: optimizeSpeed;
-					image-rendering: -moz-crisp-edges;
-					image-rendering: -webkit-optimize-contrast;
-					image-rendering: optimize-contrast;
-					image-rendering: crisp-edges;
-					position: absolute;
-					left: 0px;
-					top: 0px;
-					display: block;
-				}
-	}
-	#users p {
-		display: inline-block;
-    margin: 0px 0px 0px 10px;
-	}
-	#users img {
-		width: 5vmin;
-	}
-
+		
+		@media screen {
+			html,
+			body {
+				background-color: black;
+				height: 100vw;
+				margin: 0;
+			}
+			#contener {
+				position: relative;
+				/*width: 100vw;*/
+				min-height: 99vw;
+				display: flex;
+				flex-direction: row;
+				justify-content: center;
+				border: 1px solid black;
+			}
+			#game {
+				order: 2;
+				position: relative;
+				width: 95vw;
+				height: 70vw;
+				/*https://css-tricks.com/snippets/css/a-guide-to-flexbox/*/
+				flex: 0 1 auto;
+				border: 1px solid black;
+				box-shadow: 0px 0px 200px #ffed00;
+			}
+			#game canvas {
+				width: 100%;
+				image-rendering: optimizeSpeed;
+				image-rendering: -moz-crisp-edges;
+				image-rendering: -webkit-optimize-contrast;
+				image-rendering: optimize-contrast;
+				image-rendering: crisp-edges;
+				position: absolute;
+				left: 0px;
+				top: 0px;
+				display: block;
+			}
+		}
+		
+		@media screen and (min-aspect-ratio:50/50) {
+			html,
+			body {
+				background-color: black;
+				height: 100vh;
+				margin: 0;
+			}
+			#contener {
+				position: relative;
+				min-height: 99vh;
+				display: flex;
+				flex-direction: row;
+				justify-content: center;
+				border: 1px solid black;
+			}
+			#game {
+				position: relative;
+				width: 95vh;
+				height: : 70vh;
+				flex: 0 1 auto;
+				border: 1px solid black;
+				box-shadow: 0px 0px 200px #ffed00;
+			}
+			#game canvas {
+				width: 100%;
+				image-rendering: optimizeSpeed;
+				image-rendering: -moz-crisp-edges;
+				image-rendering: -webkit-optimize-contrast;
+				image-rendering: optimize-contrast;
+				image-rendering: crisp-edges;
+				position: absolute;
+				left: 0px;
+				top: 0px;
+				display: block;
+			}
+		}
 	</style>
- 	<!-- <script src="https://fb.me/react-15.0.0.js"></script>
+	<!-- <script src="https://fb.me/react-15.0.0.js"></script>
     <script src="https://fb.me/react-dom-15.0.0.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script> -->
 
@@ -133,7 +176,7 @@
 	<div id="contener">
 		<div id="game"></div>
 		<div id="users">
-		Players in your room
+			Players in your room
 		</div>
 	</div>
 	<!-- <script type="text/babel">
@@ -218,7 +261,7 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			this.view = 3;
 			this.sprite = sprite;
 		}
-
+		
 		function get_vorace() {
 			if (my.role == "V")
 				return my;
@@ -257,8 +300,11 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			["fspawn", "/img/Tiles/fspawn1.png"],
 			["seringe", "/img/Items/seringe.png"],
 			["floor", "/img/Tiles/floor.png"],
+			["scratch1", "/img/Tiles/scratch1.png"],
+			["scratch2", "/img/Tiles/scratch2.png"],
 			["light", "/img/Fx/light.png"],
 			["light2", "/img/Fx/light2.png"],
+			["fantom_kill", "/img/fantom/fantom_kill.png"],
 			["fantom_dead", "/img/fantom/fantom_dead.png"],
 			["fantom_nice_left", "/img/fantom/nice_left.png"],
 			["fantom_nice_right", "/img/fantom/nice_right.png"],
@@ -308,15 +354,15 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 		socket.on('list_player', function(list) {
 			clear_game();
 			document.getElementById("users").innerHTML = "";
-			for (p of list.players)	{
+			for (p of list.players) {
 				if (p.id == socket.id)
 					ui_add_user(p, true);
 			}
-			for (p of list.players)	{
+			for (p of list.players) {
 				if (p.id != socket.id)
 					ui_add_user(p, false);
 			}
-		//	ui_add_user(list['players'][i]);
+			//	ui_add_user(list['players'][i]);
 			layer_ui.ctx.shadowColor = "yellow";
 			layer_ui.ctx.shadowBlur = 10;
 			layer_ui.ctx.fillStyle = "black";
@@ -325,9 +371,9 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			layer_ui.ctx.fillText("Waiting " + (list['required'] - list['players'].length) + " players...", 448, 224);
 			layer_ui.ctx.shadowBlur = 0;
 		});
-		socket.on('update_stats', function (update) {
-		//	console.log(update);
-						ui_update_stat(update);
+		socket.on('update_stats', function(update) {
+			//	console.log(update);
+			ui_update_stat(update);
 		});
 
 		socket.on('timer', function(t) {
@@ -338,14 +384,22 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			var v = get_vorace();
 			if (v == null)
 				return;
-		//	console.log(v.sprite);
+			//	console.log(v.sprite);
+			if (my.sprite.current_anim == "kill") {
+				my.sprite.current_anim = "bad_down";
+			}
+			else 
+				for (e of enemy)
+					if (e.sprite.current_anim == "kill") {
+						e.sprite.current_anim = "bad_down";
+			}
 			if (v.sprite.current_anim == "death") {
 				v.sprite.current_anim = "nice_down";
 				v.sprite.anim_speed = 50;
 				v.sprite.anim_loop = 1;
 			}
-					console.log(list);
-									var vorace_is_in_view = 0;
+			//console.log(list);
+			var vorace_is_in_view = 0;
 			for (var i = 0; i < list.length; i++) {
 				l = list[i];
 
@@ -373,7 +427,7 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 							if (v.sprite.visible == 0) {
 								v.sprite.posx = c["x"];
 								v.sprite.posy = c["y"];
-						}
+							}
 							v.dep = c["dep"];
 							v.sprite.visible = 1;
 						}
@@ -385,15 +439,19 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 
 			refresh_game();
 		});
+
 		function ui_update_stat(update) {
-			for (var player of update){
+			for (var player of update) {
 				for (var stat in player) {
 					if (stat == 'id')
 						continue;
-						//console.log(stat);
-						var to_update = document.getElementById(player.id).getElementsByClassName(stat)[0]
-						to_update.innerHTML = stat + " " +player[stat];
-				}}
+					//console.log(stat);
+					var to_update = document.getElementById(player.id).getElementsByClassName(stat)[0];
+					to_update.innerHTML = " " + player[stat];
+					var newone = to_update.parentElement.cloneNode(true);
+					to_update.parentElement.parentNode.replaceChild(newone, to_update.parentElement);
+				}
+			}
 		}
 
 		function ui_add_user(user, my) {
@@ -405,21 +463,21 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			document.getElementById("users").appendChild(user_name);
 			for (i in user.stats) {
 				var user_div = document.createElement('div');
-		 		var user_stat = document.createElement('p');
-			 	user_stat.setAttribute("class", i);
+				var user_stat = document.createElement('p');
+				user_stat.setAttribute("class", i);
 				var stat_img = document.createElement('img');
 				stat_img.setAttribute("src", "img/ui/" + i + ".png");
 				stat_img.setAttribute("title", i);
-			 	user_stat.innerHTML = user.stats[i];
+				user_stat.innerHTML = user.stats[i];
 				user_div.appendChild(stat_img);
-			 	user_div.appendChild(user_stat);
+				user_div.appendChild(user_stat);
 				user_name.appendChild(user_div);
 			}
 		}
 
 		socket.on('start', function(list) {
 			for (i = 0; i < list['players'].length; i++) {
-					if (list['players'][i].id == socket.id) {
+				if (list['players'][i].id == socket.id) {
 					my = new User(list['players'][i].id, list['players'][i].pseudo, list['players'][i].x, list['players'][i].y, list['players'][i].role);
 					if (my.role == "V") {
 						my.sprite = new Sprite("vorace");
@@ -464,10 +522,9 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			layer_ui.ctx.fillText("Press Enter for replay !", 448, 672);
 			layer_ui.ctx.shadowBlur = 10;
 
-			setTimeout(function(){
+			setTimeout(function() {
 				my.sprite.Anim_stop();
-				for (e of enemy)
-				{
+				for (e of enemy) {
 					e.sprite.Anim_stop();
 				}
 				layer_players.objects = [];
@@ -482,14 +539,21 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 		//TODO trouver des images
 		var oldlife = 3;
 		socket.on('life', function(life) {
-			if (oldlife > life)	{
+			if (oldlife > life) {
 				var v = get_vorace()
-			//	console.log(life + " old :" + oldlife);
+					//	console.log(life + " old :" + oldlife);
 				var dead_interval = setInterval(function() {
-				v.sprite.anim_loop = 0;
-				v.sprite.current_anim = "death";
+					v.sprite.anim_loop = 0;
+					v.sprite.current_anim = "death";
+					if (my.role == "F" && v.y == my.y && v.x == my.x)
+						my.sprite.current_anim = "kill";
+					else 
+					for (e of enemy)
+						if (e.role == "F" && v.y == e.y && v.x == e.x)
+							e.sprite.current_anim = "kill";
+				console.log(my);
 				}, 50);
-				setTimeout(function(){
+				setTimeout(function() {
 					clearInterval(dead_interval);
 				}, 150);
 				v.sprite.anim_index = 0;
@@ -504,7 +568,7 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			layer_ui.ctx.shadowBlur = 4;
 			layer_ui.ctx.fillStyle = "black";
 			if (life - 1 >= 0)
-			layer_ui.ctx.fillText((life - 1), 448, 924);
+				layer_ui.ctx.fillText((life - 1), 448, 924);
 			layer_ui.ctx.shadowBlur = 0;
 			if (life == 0) {
 				putimage(layer_ui.ctx, "ui_dead", 448 - 128, 448 - 128, 256, 256);
@@ -560,14 +624,14 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			}
 		});
 		var can_move = 1;
-		setInterval(function () {
+		setInterval(function() {
 			if (can_move) {
 				can_move = 0;
-			}
-			else
-					can_move = 1;
+			} else
+				can_move = 1;
 
 		}, 125)
+
 		function refresh_game() {
 			// Create gradient
 			//TODO 80ct val
@@ -577,16 +641,16 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			//TODO (v1) Meilleur affichage en cas de victoire
 			//IDEA tableau de score et systeme de round
 			var tab = map.field;
-				// my.sprite.posx = my.x;
-				// my.sprite.posy = my.y;
+			// my.sprite.posx = my.x;
+			// my.sprite.posy = my.y;
 			//			console.log(my)
 			//if ((my.x != my.sprite.posx || my.y != my.sprite.posy))
 			if (((my.x != my.sprite.posx + 1) && (my.x != my.sprite.posx - 1) && (my.x != my.sprite.posx)) ||
-		(my.y != my.sprite.posy + 1) && (my.y != my.sprite.posy - 1) && (my.y != my.sprite.posy))	{
-			 my.sprite.posx = my.x;
-			 my.sprite.posy = my.y;
-		 }
-					my.sprite.Move(my.x * tile_size, my.y * tile_size, 100);
+				(my.y != my.sprite.posy + 1) && (my.y != my.sprite.posy - 1) && (my.y != my.sprite.posy)) {
+				my.sprite.posx = my.x;
+				my.sprite.posy = my.y;
+			}
+			my.sprite.Move(my.x * tile_size, my.y * tile_size, 100);
 			set_anim_dep(my.dep.toString(), my.sprite, my);
 			layer_items.Clear();
 			//		layer_players.ctx.clearRect(0, 0, layer_players.canvas.width, layer_players.canvas.height);
@@ -595,11 +659,10 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			for (i = 0; i < enemy.length; i++) {
 				e = enemy[i];
 				if (((e.x != e.sprite.posx + 1) && (e.x != e.sprite.posx - 1) && (e.x != e.sprite.posx)) ||
-			(e.y != e.sprite.posy + 1) && (e.y != e.sprite.posy - 1) && (e.y != e.sprite.posy))	{
-				 e.sprite.posx = e.x;
-				 e.sprite.posy = e.y;
-			 	}
-			 	else
+					(e.y != e.sprite.posy + 1) && (e.y != e.sprite.posy - 1) && (e.y != e.sprite.posy)) {
+					e.sprite.posx = e.x;
+					e.sprite.posy = e.y;
+				} else
 					e.sprite.Move(e.x * tile_size, e.y * tile_size, 100);
 				set_anim_dep(e.dep.toString(), e.sprite, e);
 			}
@@ -650,6 +713,7 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 		}
 		var refresh_rate = 100;
 		var game_interval_id;
+
 		function launch_game() {
 			timer = 0;
 			ingame = true;
@@ -666,11 +730,51 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 				if (golden)
 					golden.Clear();
 				layer_players.Clear();
-				putimage(layer_players.ctx, "halo", my.sprite.posx * tile_size - 16 + my.sprite.movex, my.sprite.posy * tile_size - 16  + my.sprite.movey, 64, 64);
+				putimage(layer_players.ctx, "halo", my.sprite.posx * tile_size - 16 + my.sprite.movex, my.sprite.posy * tile_size - 16 + my.sprite.movey, 64, 64);
 				layer_items.Draw();
 				layer_players.Draw();
 				get_vorace().sprite.Draw()
 			}, 50);
+		}
+
+		function map_put_scratch(dep, user) {
+			var rand = Math.floor(Math.random() * 20) - 10;
+			var anim_num = 1;
+			user.sprite.modx = 0;
+			user.sprite.mody = 0;
+			if (rand > 0)
+				anim_num = 2;
+
+			if (dep == 1 && (map.field[user.sprite.posy][user.sprite.posx - 1] == 0)) {
+				putimage(layer_map.ctx, "scratch" + anim_num,
+					user.sprite.movex + user.sprite.posx * tile_size - 10,
+					user.sprite.movey + user.sprite.posy * tile_size + rand,
+					tile_size, tile_size, 270);
+				user.sprite.modx = -10;
+
+			}
+			if (dep == 2 && (map.field[user.sprite.posy - 1][user.sprite.posx] == 0)) {
+				putimage(layer_map.ctx, "scratch" + anim_num,
+					user.sprite.movex + user.sprite.posx * tile_size + rand,
+					user.sprite.movey + user.sprite.posy * tile_size - 10,
+					tile_size, tile_size);
+				user.sprite.mody = -10;
+			}
+			if (dep == 3 && (map.field[user.sprite.posy][user.sprite.posx + 1] == 0)) {
+				putimage(layer_map.ctx, "scratch" + anim_num,
+					user.sprite.movex + user.sprite.posx * tile_size + 10,
+					user.sprite.movey + user.sprite.posy * tile_size + rand,
+					tile_size, tile_size, 90);
+				user.sprite.modx = 10;
+
+			}
+			if (dep == 4 && (map.field[user.sprite.posy + 1][user.sprite.posx] == 0)) {
+				putimage(layer_map.ctx, "scratch" + anim_num,
+					user.sprite.movex + user.sprite.posx * tile_size + rand,
+					user.sprite.movey + user.sprite.posy * tile_size + 10,
+					tile_size, tile_size, 180);
+				user.sprite.mody = 10;
+			}
 		}
 
 		function set_anim_dep(dep, sprite, user) {
@@ -682,13 +786,15 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 				3: "right",
 				4: "down"
 			};
+			if (sprite.current_anim == "kill")
+				return;
 			if (sprite.name == "vorace")
 				if (sprite.current_anim == "death")
 					return;
 				else if (timer == 0)
-					sprite.current_anim = "nice_" + dep_tab[dep];
-				else
-					sprite.current_anim = "bad_" + dep_tab[dep];
+				sprite.current_anim = "nice_" + dep_tab[dep];
+			else
+				sprite.current_anim = "bad_" + dep_tab[dep];
 			else if (sprite.name = "fantom")
 				if (user.eats)
 					sprite.current_anim = "dead";
@@ -696,6 +802,8 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 				sprite.current_anim = "bad_" + dep_tab[dep];
 			else
 				sprite.current_anim = "nice_" + dep_tab[dep];
+
+			map_put_scratch(dep, user);
 		}
 		document.addEventListener('keydown', function(event) {
 			if (!ingame) {

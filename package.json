@@ -5,7 +5,8 @@
   "main": "index.js",
   "dependencies": {
     "express": "^4.14.0",
-    "socketio": "^1.0.0"
+    "socketio": "^1.0.0",
+    "xss": "^0.2.13"
   },
   "devDependencies": {},
   "scripts": {

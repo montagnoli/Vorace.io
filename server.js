@@ -4,6 +4,7 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var fs = require('fs');
+var xss = require('xss');
 
 app.use('/img', express.static(__dirname + '/img'));
 app.use('/js', express.static(__dirname + '/js'));
@@ -321,7 +322,7 @@ function User(socket, pseudo) {
         "eated_ember" : this.score_eated_ember,
         "eated_seringe" : this.score_eated_seringe,
         "eated_golden" : this.score_eated_golden,
-        "victory_as_fantom " :this.score_victory_as_fantom,
+        "victory_as_fantom" :this.score_victory_as_fantom,
         "victory_as_vorace" : this.score_victory_as_vorace}
     }
 
@@ -565,7 +566,8 @@ io.on('connection', function(socket) {
     socket.on('pseudo', function(name) {
         var user = get_user_by_id(socket.id);
         if (user == null) {
-            users.push(new User(socket, name));
+            console.log()
+            users.push(new User(socket, xss(name)));
             console.log(socket.id + " has name <" + name + ">");
         }
     });

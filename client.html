@@ -10,12 +10,12 @@
   		0%   {box-shadow: 0px 0px 40px #ffffee;}
   		100% {box-shadow: none }
 		}
-		
+
 		.my_stats {
 			color: white !important;
 			text-shadow: 0px 0px 20px #ffffee !important;
 		}
-		
+
 		#users {
 			max-height: 100vh;
 			min-width: 20%;
@@ -27,17 +27,17 @@
 			align-items: center;
 			text-shadow: 0px 0px 20px #ffed00;
 		}
-		
+
 		#users h1 {
 			margin: 1vmin;
 			display: block !important;
 		}
-		
+
 		#users p {
 			display: inline-block;
 			margin: 0px 0px 0px 10px;
 		}
-		
+
 		#users img {
 			width: 3vmin;
 		}
@@ -48,29 +48,30 @@
    			animation-duration: 1s;
 		}
 			#users> div {
-			
+
 			z-index: 1;
 			flex-shrink: 0;
 			display: flex;
 			flex-direction: column;
 			flex-wrap: wrap;
 			padding: 1vmin;
+			max-width: 15vw;
 			margin-left: 2vmin;
 			margin-right: 2vmin;
 			color: #ffed00;
-			max-height: 45vmin;
+			min-height: 45vmin;
 			background-color: black;
 			text-shadow: 0px 0px 20px #ffed00;
 			box-shadow: 0px 0px 20px #ffed00;
 			font-size: 1vmin;
 		}
-		
+
 		#users p {
 			flex: 0 1 auto;
 			margin: 0;
 			font-size: 2vmin;
 		}
-		
+
 		@media screen and (min-aspect-ratio:900/600) {
 			#users> div {
 				font-size: 2vmin;
@@ -84,7 +85,7 @@
 				width: 3vmin;
 			}
 		}
-		
+
 		@media screen {
 			html,
 			body {
@@ -124,7 +125,7 @@
 				display: block;
 			}
 		}
-		
+
 		@media screen and (min-aspect-ratio:50/50) {
 			html,
 			body {
@@ -262,7 +263,7 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			this.view = 3;
 			this.sprite = sprite;
 		}
-		
+
 		function get_vorace() {
 			if (my.role == "V")
 				return my;
@@ -389,7 +390,7 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 			if (my.sprite.current_anim == "kill") {
 				my.sprite.current_anim = "bad_down";
 			}
-			else 
+			else
 				for (e of enemy)
 					if (e.sprite.current_anim == "kill") {
 						e.sprite.current_anim = "bad_down";
@@ -407,21 +408,21 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 				e = get_user_by_id(l['id'])
 				e.x = l['x'];
 				e.y = l['y'];
-				e.dep = l['dep'];
-				e.eats = l['eat'];
+				e.dep = l['d'];
+				e.eats = l['e'];
 				if (e.role == "F") {
-					e.view = l['view-length'];
+					e.view = l['vl'];
 				}
 				if (my.role == "V") {
 					vorace_is_in_view = 1;
 					if (e == my && (tab[e.y][e.x] == 1 || tab[e.y][e.x] == 3))
 						tab[e.y][e.x] = 9;
 				} else {
-					for (var j = 0; j < l['view'].length; j++) {
-						var c = l['view'][j];
-						tab[c["y"]][c["x"]] = c['val'];
-
-						if (c['vorace'] == true) {
+					for (var j = 0; j < l['v'].length; j++) {
+						var c = l['v'][j];
+						if (c['val'] !== undefined)
+							tab[c["y"]][c["x"]] = c['val'];
+						if (c['vo'] == true) {
 							vorace_is_in_view = 1;
 							v.x = c["x"];
 							v.y = c["y"];
@@ -437,10 +438,22 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 						v.sprite.visible = 0;
 				}
 			}
-
 			refresh_game();
 		});
 
+
+		function autoSizeText() {
+			console.log("resized");
+			var titles = document.querySelectorAll("div > h1");
+			console.log(titles);
+			for (title of titles){
+				title.style.fontSize = title.parentElement.offsetWidth / title.innerHTML.length * 1.5 + "px";
+				//title.style.fontSize = "1px";
+				console.log(title.parentElement.offsetWidth , title.innerHTML.length);
+			}
+		}
+
+	window.addEventListener("resize", autoSizeText);
 		function ui_update_stat(update) {
 			for (var player of update) {
 				for (var stat in player) {
@@ -454,7 +467,7 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 				}
 			}
 		}
-
+			document.body.addEventListener("resize", autoSizeText);
 		function ui_add_user(user, my) {
 			var user_name = document.createElement('div');
 			if (my == true)
@@ -474,6 +487,11 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 				user_div.appendChild(user_stat);
 				user_name.appendChild(user_div);
 			}
+			autoSizeText();
+			autoSizeText();
+			autoSizeText();
+			autoSizeText();
+			autoSizeText();
 		}
 
 		socket.on('start', function(list) {
@@ -548,7 +566,7 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 					v.sprite.current_anim = "death";
 					if (my.role == "F" && v.y == my.y && v.x == my.x)
 						my.sprite.current_anim = "kill";
-					else 
+					else
 					for (e of enemy)
 						if (e.role == "F" && v.y == e.y && v.x == e.x)
 							e.sprite.current_anim = "kill";
@@ -699,13 +717,18 @@ vorace.Move(11 * tile_size, 10 * tile_size, 125);
 						}
 					} else
 						get = true;
+
 					if (get == false)
 						continue;
 					if (tab[y][x] == 3) {
 						putimage(layer_items.ctx, "seringe", x * tile_size, y * tile_size, tile_size, tile_size);
+						if (my.role == "F")
+							tab[y][x] = 9;
 					} else if (tab[y][x] == 1) {
 						var rand = Math.floor(Math.random() * 5)
-						putimage(layer_items.ctx, "ember", x * tile_size, y * tile_size, tile_size - rand, tile_size - rand);
+								putimage(layer_items.ctx, "ember", x * tile_size, y * tile_size, tile_size - rand, tile_size - rand);
+						if (my.role == "F")
+							tab[y][x] = 9;
 					}
 					if (golden && golden.posx != -1)
 						golden.Draw();

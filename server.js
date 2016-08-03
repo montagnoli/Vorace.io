@@ -197,13 +197,20 @@ function Game() {
         for (var y = 0; y < tab.length; y++) {
             for (var x = 0; x < tab[y].length; x++) {
                 if (Math.abs(mx - x) + Math.abs(my - y) <= view)
-                    result.push({
-                        "val": tab[y][x],
-                        "vorace": (p.x == x && p.y == y),
-                        "x": x,
-                        "y": y,
-                        "dep": p.dep
-                    });
+                {
+                  var to_push = {}
+                  if (tab[y][x] == 1 || tab[y][x] == 3)
+                    to_push.val = tab[y][x]
+                  if (p.x == x && p.y == y)
+                    to_push.vo = true;
+                  if (p.x == x && p.y == y)
+                    to_push.dep = p.dep
+                  if (Object.keys(to_push).length !== 0) {
+                    to_push.x = x;
+                    to_push.y = y;
+                    result.push(to_push);
+                    }
+                  }
             }
         }
         return (result);
@@ -218,18 +225,18 @@ function Game() {
                 'id': p.socket.id.substring(2),
                 'x': p.x,
                 'y': p.y,
-                'dep': p.dep,
-                'eat': p.eats
+                'd': p.dep,
+                'e': p.eats
             });
             if (p.role != "V") {
                 mf.push({
                     'id': p.socket.id.substring(2),
                     'x': p.x,
                     'y': p.y,
-                    'dep': p.dep,
-                    'eat': p.eats,
-                    'view-length': p.view,
-                    'view': this.get_view(p.x, p.y, p.view)
+                    'd': p.dep,
+                    'e': p.eats,
+                    'vl': p.view,
+                    'v': this.get_view(p.x, p.y, p.view)
                 });
             }
         }
@@ -577,10 +584,7 @@ io.on('connection', function(socket) {
 http.listen(3000, '0.0.0.0', function() {
     console.log('listening on *:3000');
 });
-var http2 = require('http').Server(app);
-http2.listen(3001, '0.0.0.0', function() {
-    console.log('listening on *:3000');
-});
+
 
 // http.listen(3000,'127.0.0.1' || 'localhost',function() {
 //     console.log('Application worker ' + process.pid + ' started...');
